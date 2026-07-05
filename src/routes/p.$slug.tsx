@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { getPage, getItems } from "@/lib/content";
+import { getPage, getItems, type ContentItem } from "@/lib/content";
 
 export const Route = createFileRoute("/p/$slug")({
   loader: ({ params }) => {
@@ -66,7 +66,7 @@ function CategoryPage() {
           <p className="mt-16 text-muted-foreground">Ainda não há itens nesta página.</p>
         ) : (
           <div className="mt-14 grid gap-6 sm:grid-cols-2">
-            {items.map((item) => (
+            {items.map((item: ContentItem) => (
               <article
                 key={item.id}
                 className="group overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-butter"
