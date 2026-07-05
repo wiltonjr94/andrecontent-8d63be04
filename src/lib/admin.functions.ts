@@ -247,13 +247,25 @@ export const uploadMedia = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const bytes = Buffer.from(data.base64, "base64");
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `uploads/${Date.now()}-${safe}`;
-    const { error } = await supabaseAdmin.storage
-      .from("media")
-      .upload(path, bytes, { contentType: data.contentType, upsert: false });
-    if (error) throw new Error(error.message);
+    const projectId = process.env.SUPABASE_PROJECT_ID;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!projectId || !key) throw new Error("Storage not configured");
+    const res = await fetch(
+      `https://${projectId}.supabase.co/storage/v1/object/media/${path}`,
+      {
+        method: "POST",
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          "Content-Type": data.contentType || "application/octet-stream",
+          "x-upsert": "false",
+        },
+        body: bytes,
+      },
+    );
+    if (!res.ok) throw new Error("Upload failed: " + (await res.text()));
     return { url: `/api/public/media/${path}` };
   });
