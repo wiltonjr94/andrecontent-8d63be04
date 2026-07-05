@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { pages } from "@/lib/content";
+import { getSiteBundle } from "@/lib/public-data.functions";
 
 const BASE_URL = "";
 
@@ -8,7 +8,8 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const paths = ["/", ...pages.map((p) => `/p/${p.slug}`)];
+        const bundle = await getSiteBundle();
+        const paths = ["/", ...bundle.pages.map((p) => `/p/${p.slug}`)];
         const urls = paths
           .map(
             (path) =>

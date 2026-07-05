@@ -3,15 +3,14 @@ import { ArrowUpRight, MessageCircle } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HighlightSlider } from "@/components/HighlightSlider";
-import { pages, highlights, siteSettings } from "@/lib/content";
+import { useSite } from "@/lib/site-context";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const sortedPages = [...pages].sort((a, b) => a.order - b.order);
-  const sortedHighlights = [...highlights].sort((a, b) => a.order - b.order);
+  const { site, pages, highlights } = useSite();
 
   return (
     <div className="min-h-screen">
@@ -20,14 +19,14 @@ function Index() {
       <main className="mx-auto max-w-6xl px-5 pt-32 sm:px-8 sm:pt-40">
         {/* Hero */}
         <section className="fade-up">
-          <h1 className="max-w-4xl text-5xl font-bold leading-[1.02] sm:text-7xl md:text-8xl">
-            Oi, eu sou o <span className="text-butter">André</span>
+          <h1 className="max-w-4xl text-5xl font-bold leading-[1.02] text-butter sm:text-7xl md:text-8xl">
+            {site.hero_title}
           </h1>
           <p className="mt-8 max-w-2xl text-lg text-foreground/80 sm:text-xl">
-            {siteSettings.heroSubtitle}
+            {site.hero_subtitle}
           </p>
           <a
-            href={siteSettings.whatsapp}
+            href={site.whatsapp}
             target="_blank"
             rel="noreferrer"
             className="mt-10 inline-flex items-center gap-2 rounded-full bg-tomato px-7 py-3.5 text-base font-semibold text-tomato-foreground transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110"
@@ -42,7 +41,7 @@ function Index() {
             Explore
           </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {sortedPages.map((p) => (
+            {pages.map((p) => (
               <Link
                 key={p.slug}
                 to="/p/$slug"
@@ -62,7 +61,7 @@ function Index() {
         {/* Highlights slider */}
         <section className="mt-28 sm:mt-36">
           <h2 className="mb-6 text-3xl font-bold sm:text-4xl">Destaques</h2>
-          <HighlightSlider highlights={sortedHighlights} />
+          <HighlightSlider highlights={highlights} />
         </section>
       </main>
 
