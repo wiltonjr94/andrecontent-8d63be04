@@ -80,20 +80,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "André — Portfólio criativo" },
+      { title: "André - Produção de conteúdo" },
       {
         name: "description",
         content:
           "Portfólio pessoal do André: Live Content, Cases e Frames. Trabalhos criativos com visual limpo, moderno e vibrante.",
       },
       { name: "author", content: "André" },
-      { property: "og:title", content: "André — Portfólio criativo" },
+      { property: "og:title", content: "André - Produção de conteúdo" },
       {
         property: "og:description",
         content: "Live Content, Cases e Frames. Trabalhos criativos do André.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "André - Produção de conteúdo" },
+      { name: "description", content: "Produção de conteúdo, fotografia e coberturas ao vivo para marcas, eventos e experiências que merecem ser lembradas." },
+      { property: "og:description", content: "Produção de conteúdo, fotografia e coberturas ao vivo para marcas, eventos e experiências que merecem ser lembradas." },
+      { name: "twitter:description", content: "Produção de conteúdo, fotografia e coberturas ao vivo para marcas, eventos e experiências que merecem ser lembradas." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bb32c2d8-3c46-465f-ae4a-0c49596e3fc0/id-preview-a4aa5901--f80ba0dd-496e-4886-aa88-6d9401bde2aa.lovable.app-1783268925578.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bb32c2d8-3c46-465f-ae4a-0c49596e3fc0/id-preview-a4aa5901--f80ba0dd-496e-4886-aa88-6d9401bde2aa.lovable.app-1783268925578.png" },
     ],
     links: [
       {
