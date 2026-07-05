@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import type { Highlight } from "@/lib/content";
+
+interface Highlight {
+  id: string;
+  title: string;
+  image_url: string | null;
+  link: string;
+}
 
 export function HighlightSlider({ highlights }: { highlights: Highlight[] }) {
   const [active, setActive] = useState(0);
@@ -22,12 +28,14 @@ export function HighlightSlider({ highlights }: { highlights: Highlight[] }) {
             to={h.link}
             className="group relative aspect-[16/10] w-full shrink-0 sm:aspect-[21/9]"
           >
-            <img
-              src={h.image}
-              alt={h.title}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            {h.image_url && (
+              <img
+                src={h.image_url}
+                alt={h.title}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-denim/90 via-denim/20 to-transparent" />
             <div className="absolute bottom-0 left-0 flex items-center gap-2 p-6 sm:p-10">
               <span className="text-2xl font-semibold text-butter sm:text-4xl">
