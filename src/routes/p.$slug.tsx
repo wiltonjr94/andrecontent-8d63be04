@@ -70,19 +70,31 @@ function CategoryPage() {
           <p className="mt-16 text-muted-foreground">Ainda não há itens nesta página.</p>
         ) : (
           <div className="mt-14 grid gap-6 sm:grid-cols-2">
-            {items.map((item: PageData["items"][number]) => (
+            {items.map((item: PageData["items"][number], i: number) => (
               <article
                 key={item.id}
-                className="group overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-butter"
+                className="group overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 fade-up hover:-translate-y-1 hover:border-butter"
+                style={{ animationDelay: `${Math.min(i, 8) * 70}ms` }}
               >
-                <div className="aspect-[16/10] overflow-hidden">
-                  {item.image_url && (
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
+                <div className="aspect-[16/10] overflow-hidden bg-muted">
+                  {toEmbed(item.video_url) ? (
+                    <iframe
+                      src={toEmbed(item.video_url)!}
+                      title={item.title}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="h-full w-full"
                     />
+                  ) : (
+                    item.image_url && (
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )
                   )}
                 </div>
                 <div className="p-6">
