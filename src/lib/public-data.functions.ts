@@ -32,6 +32,7 @@ export interface SiteBundle {
   };
   pages: { slug: string; title: string; description: string }[];
   highlights: { id: string; title: string; image_url: string | null; link: string }[];
+  brands: { id: string; name: string; logo_url: string | null }[];
 }
 
 const DEFAULT_BUNDLE: SiteBundle = {
@@ -55,6 +56,7 @@ const DEFAULT_BUNDLE: SiteBundle = {
   },
   pages: [],
   highlights: [],
+  brands: [],
 };
 
 export const getSiteBundle = createServerFn({ method: "GET" }).handler(
@@ -69,12 +71,14 @@ export const getSiteBundle = createServerFn({ method: "GET" }).handler(
           .from("highlights")
           .select("id, title, image_url, link")
           .order("sort_order"),
+        supabase.from("brands").select("id, name, logo_url").order("sort_order"),
       ]);
       return {
         site: siteRes.data ?? DEFAULT_BUNDLE.site,
         theme: themeRes.data ?? DEFAULT_BUNDLE.theme,
         pages: pagesRes.data ?? [],
         highlights: highlightsRes.data ?? [],
+        brands: brandsRes.data ?? [],
       };
     } catch {
       return DEFAULT_BUNDLE;
