@@ -63,7 +63,7 @@ export const getSiteBundle = createServerFn({ method: "GET" }).handler(
   async (): Promise<SiteBundle> => {
     try {
       const supabase = publicClient();
-      const [siteRes, themeRes, pagesRes, highlightsRes] = await Promise.all([
+      const [siteRes, themeRes, pagesRes, highlightsRes, brandsRes] = await Promise.all([
         supabase.from("site_settings").select("*").limit(1).maybeSingle(),
         supabase.from("theme_settings").select("*").limit(1).maybeSingle(),
         supabase.from("pages").select("slug, title, description").order("sort_order"),
