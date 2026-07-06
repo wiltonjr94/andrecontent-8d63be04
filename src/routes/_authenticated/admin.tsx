@@ -499,6 +499,7 @@ function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => 
         <HighlightRow
           key={h.id}
           h={h}
+          pages={data.pages}
           canUp={idx > 0}
           canDown={idx < data.highlights.length - 1}
           onMove={(dir) => move(idx, dir)}
@@ -515,6 +516,7 @@ function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => 
       {adding ? (
         <HighlightRow
           h={{ id: "", title: "", image_url: null, link: "/", sort_order: data.highlights.length, created_at: "", updated_at: "" }}
+          pages={data.pages}
           isNew
           onSave={async (payload) => {
             await saveFn({ data: { ...payload, sort_order: data.highlights.length } });
