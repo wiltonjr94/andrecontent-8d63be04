@@ -3,15 +3,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getPageBySlug, type PageData } from "@/lib/public-data.functions";
-
-function toEmbed(url?: string | null): string | null {
-  if (!url) return null;
-  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
-  const vimeo = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
-  return null;
-}
+import { toEmbed } from "@/lib/embed";
 
 export const Route = createFileRoute("/p/$slug")({
   loader: async ({ params }) => {
