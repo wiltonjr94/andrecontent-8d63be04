@@ -152,7 +152,7 @@ function ItemPage() {
 
         {media.length > 0 && (
           <div className="mt-14 grid gap-6 sm:grid-cols-2">
-            {media.map((m) => (
+            {media.map((m: ItemMedia) => (
               <MediaBlock key={m.id} m={m} />
             ))}
           </div>
