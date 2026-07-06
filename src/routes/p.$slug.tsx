@@ -72,8 +72,10 @@ function CategoryPage() {
         ) : (
           <div className="mt-14 grid gap-6 sm:grid-cols-2">
             {items.map((item: PageData["items"][number], i: number) => (
-              <article
+              <Link
                 key={item.id}
+                to="/item/$id"
+                params={{ id: item.id }}
                 className="group overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 fade-up hover:-translate-y-1 hover:border-butter"
                 style={{ animationDelay: `${Math.min(i, 8) * 70}ms` }}
               >
@@ -111,18 +113,11 @@ function CategoryPage() {
                     )}
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-                  {item.link && (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-runway transition-colors hover:text-butter"
-                    >
-                      Ver projeto <ArrowUpRight className="h-4 w-4" />
-                    </a>
-                  )}
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-runway transition-colors group-hover:text-butter">
+                    Ver cobertura <ArrowUpRight className="h-4 w-4" />
+                  </span>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}
