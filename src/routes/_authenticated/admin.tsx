@@ -330,6 +330,7 @@ function PagesSection({ data, onSaved }: { data: AdminData; onSaved: () => void 
 function PageBlock({
   page,
   items,
+  allMedia,
   canUp,
   canDown,
   onMove,
@@ -339,6 +340,7 @@ function PageBlock({
 }: {
   page: AdminData["pages"][number];
   items: AdminData["items"];
+  allMedia: AdminData["media"];
   canUp: boolean;
   canDown: boolean;
   onMove: (dir: number) => void;
@@ -382,6 +384,7 @@ function PageBlock({
             <ItemRow
               key={item.id}
               item={item}
+              media={allMedia.filter((m) => m.item_id === item.id)}
               canUp={idx > 0}
               canDown={idx < items.length - 1}
               onMove={(dir) => moveItem(idx, dir)}
@@ -393,6 +396,7 @@ function PageBlock({
                 await delItemFn({ data: { id: item.id } });
                 onSaved();
               }}
+              onSaved={onSaved}
             />
           ))}
         </div>
