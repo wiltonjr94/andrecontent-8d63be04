@@ -287,3 +287,84 @@ export const uploadMedia = createServerFn({ method: "POST" })
     if (!res.ok) throw new Error("Upload failed: " + (await res.text()));
     return { url: `/api/public/media/${path}` };
   });
+
+// ----- Brands -----
+const brandSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  logo_url: z.string().nullable().optional(),
+  sort_order: z.number().optional(),
+});
+
+export const saveBrand = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => brandSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const payload = { name: data.name, logo_url: data.logo_url || null };
+    if (data.id) {
+      const { error } = await context.supabase.from("brands").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase
+        .from("brands")
+        .insert({ ...payload, sort_order: data.sort_order ?? 0 });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteBrand = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("brands").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ----- Item media (gallery) -----
+const mediaSchema = z.object({
+  id: z.string().optional(),
+  item_id: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  media_type: z.enum(["image", "video"]),
+  url: z.string().nullable().optional(),
+  sort_order: z.number().optional(),
+});
+
+export const saveMedia = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => mediaSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const payload = {
+      item_id: data.item_id,
+      title: data.title,
+      description: data.description || "",
+      media_type: data.media_type,
+      url: data.url || null,
+    };
+    if (data.id) {
+      const { error } = await context.supabase.from("item_media").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase
+        .from("item_media")
+        .insert({ ...payload, sort_order: data.sort_order ?? 0 });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteMedia = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("item_media").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
