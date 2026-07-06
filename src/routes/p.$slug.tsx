@@ -3,15 +3,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getPageBySlug, type PageData } from "@/lib/public-data.functions";
-
-function toEmbed(url?: string | null): string | null {
-  if (!url) return null;
-  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
-  const vimeo = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
-  return null;
-}
+import { toEmbed } from "@/lib/embed";
 
 export const Route = createFileRoute("/p/$slug")({
   loader: async ({ params }) => {
@@ -80,8 +72,10 @@ function CategoryPage() {
         ) : (
           <div className="mt-14 grid gap-6 sm:grid-cols-2">
             {items.map((item: PageData["items"][number], i: number) => (
-              <article
+              <Link
                 key={item.id}
+                to="/item/$id"
+                params={{ id: item.id }}
                 className="group overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 fade-up hover:-translate-y-1 hover:border-butter"
                 style={{ animationDelay: `${Math.min(i, 8) * 70}ms` }}
               >
@@ -119,18 +113,11 @@ function CategoryPage() {
                     )}
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-                  {item.link && (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-runway transition-colors hover:text-butter"
-                    >
-                      Ver projeto <ArrowUpRight className="h-4 w-4" />
-                    </a>
-                  )}
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-runway transition-colors group-hover:text-butter">
+                    Ver cobertura <ArrowUpRight className="h-4 w-4" />
+                  </span>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}

@@ -32,6 +32,7 @@ export interface SiteBundle {
   };
   pages: { slug: string; title: string; description: string }[];
   highlights: { id: string; title: string; image_url: string | null; link: string }[];
+  brands: { id: string; name: string; logo_url: string | null }[];
 }
 
 const DEFAULT_BUNDLE: SiteBundle = {
@@ -55,13 +56,14 @@ const DEFAULT_BUNDLE: SiteBundle = {
   },
   pages: [],
   highlights: [],
+  brands: [],
 };
 
 export const getSiteBundle = createServerFn({ method: "GET" }).handler(
   async (): Promise<SiteBundle> => {
     try {
       const supabase = publicClient();
-      const [siteRes, themeRes, pagesRes, highlightsRes] = await Promise.all([
+      const [siteRes, themeRes, pagesRes, highlightsRes, brandsRes] = await Promise.all([
         supabase.from("site_settings").select("*").limit(1).maybeSingle(),
         supabase.from("theme_settings").select("*").limit(1).maybeSingle(),
         supabase.from("pages").select("slug, title, description").order("sort_order"),
@@ -69,12 +71,14 @@ export const getSiteBundle = createServerFn({ method: "GET" }).handler(
           .from("highlights")
           .select("id, title, image_url, link")
           .order("sort_order"),
+        supabase.from("brands").select("id, name, logo_url").order("sort_order"),
       ]);
       return {
         site: siteRes.data ?? DEFAULT_BUNDLE.site,
         theme: themeRes.data ?? DEFAULT_BUNDLE.theme,
         pages: pagesRes.data ?? [],
         highlights: highlightsRes.data ?? [],
+        brands: brandsRes.data ?? [],
       };
     } catch {
       return DEFAULT_BUNDLE;
@@ -113,5 +117,64 @@ export const getPageBySlug = createServerFn({ method: "GET" })
     return {
       page: { slug: page.slug, title: page.title, description: page.description },
       items: items ?? [],
+    };
+  });
+
+export interface ItemMedia {
+  id: string;
+  title: string;
+  description: string;
+  media_type: string;
+  url: string | null;
+}
+
+export interface ItemDetail {
+  item: {
+    id: string;
+    title: string;
+    description: string;
+    image_url: string | null;
+    video_url: string | null;
+    item_date: string | null;
+    link: string | null;
+    page_slug: string | null;
+    page_title: string | null;
+  } | null;
+  media: ItemMedia[];
+}
+
+export const getItemById = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ id: z.string() }).parse(data))
+  .handler(async ({ data }): Promise<ItemDetail> => {
+    const supabase = publicClient();
+    const { data: item } = await supabase
+      .from("content_items")
+      .select("id, title, description, image_url, video_url, item_date, link, page_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!item) return { item: null, media: [] };
+    const { data: page } = await supabase
+      .from("pages")
+      .select("slug, title")
+      .eq("id", item.page_id)
+      .maybeSingle();
+    const { data: media } = await supabase
+      .from("item_media")
+      .select("id, title, description, media_type, url")
+      .eq("item_id", item.id)
+      .order("sort_order");
+    return {
+      item: {
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        image_url: item.image_url,
+        video_url: item.video_url,
+        item_date: item.item_date,
+        link: item.link,
+        page_slug: page?.slug ?? null,
+        page_title: page?.title ?? null,
+      },
+      media: media ?? [],
     };
   });

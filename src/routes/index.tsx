@@ -3,6 +3,7 @@ import { ArrowUpRight, MessageCircle } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HighlightSlider } from "@/components/HighlightSlider";
+import { BrandsMarquee } from "@/components/BrandsMarquee";
 import { useSite } from "@/lib/site-context";
 
 export const Route = createFileRoute("/")({
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { site, pages, highlights } = useSite();
+  const { site, pages, highlights, brands } = useSite();
 
   return (
     <div className="min-h-screen">
@@ -34,6 +35,9 @@ function Index() {
             <MessageCircle className="h-5 w-5" /> Diga oi
           </a>
         </section>
+
+        {/* Brands marquee */}
+        <BrandsMarquee brands={brands} />
 
         {/* Category cards */}
         <section className="mt-28 sm:mt-36">
