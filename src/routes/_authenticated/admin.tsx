@@ -308,6 +308,7 @@ function PagesSection({ data, onSaved }: { data: AdminData; onSaved: () => void 
           key={page.id}
           page={page}
           items={data.items.filter((i) => i.page_id === page.id)}
+          allMedia={data.media}
           canUp={idx > 0}
           canDown={idx < data.pages.length - 1}
           onMove={(dir) => move(idx, dir)}
