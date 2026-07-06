@@ -536,6 +536,7 @@ function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => 
 
 function HighlightRow({
   h,
+  pages,
   isNew,
   canUp,
   canDown,
@@ -545,6 +546,7 @@ function HighlightRow({
   onCancel,
 }: {
   h: AdminData["highlights"][number];
+  pages: AdminData["pages"];
   isNew?: boolean;
   canUp?: boolean;
   canDown?: boolean;
@@ -559,7 +561,21 @@ function HighlightRow({
     <div className={cardCls}>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Título" value={f.title} onChange={(v) => set("title", v)} />
-        <Field label="Link (destino)" value={f.link} onChange={(v) => set("link", v)} />
+        <div>
+          <label className={labelCls}>Página de destino</label>
+          <select
+            className={inputCls}
+            value={f.link}
+            onChange={(e) => set("link", e.target.value)}
+          >
+            <option value="/">Home</option>
+            {pages.map((p) => (
+              <option key={p.id} value={`/p/${p.slug}`}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className="mt-3">
         <label className={labelCls}>Imagem</label>
