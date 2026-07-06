@@ -14,6 +14,10 @@ import {
   deleteHighlight,
   reorder,
   uploadMedia,
+  saveBrand,
+  deleteBrand,
+  saveMedia,
+  deleteMedia,
 } from "@/lib/admin.functions";
 import { ArrowDown, ArrowUp, LogOut, Trash2, Plus } from "lucide-react";
 
@@ -30,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   ),
 });
 
-type Tab = "site" | "theme" | "pages" | "highlights";
+type Tab = "site" | "theme" | "pages" | "highlights" | "brands";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-runway";
@@ -82,6 +86,7 @@ function AdminPage() {
               ["theme", "Cores & Fontes"],
               ["pages", "Páginas & Itens"],
               ["highlights", "Destaques"],
+              ["brands", "Marcas"],
             ] as [Tab, string][]
           ).map(([id, label]) => (
             <button
@@ -102,6 +107,7 @@ function AdminPage() {
         {tab === "theme" && <ThemeSection data={data} onSaved={refresh} />}
         {tab === "pages" && <PagesSection data={data} onSaved={refresh} />}
         {tab === "highlights" && <HighlightsSection data={data} onSaved={refresh} />}
+        {tab === "brands" && <BrandsSection data={data} onSaved={refresh} />}
       </main>
     </div>
   );
