@@ -490,6 +490,250 @@ function ItemRow({
   );
 }
 
+function MediaManager({
+  itemId,
+  media,
+  onSaved,
+}: {
+  itemId: string;
+  media: AdminData["media"];
+  onSaved: () => void;
+}) {
+  const saveFn = useServerFn(saveMedia);
+  const delFn = useServerFn(deleteMedia);
+  const reorderFn = useServerFn(reorder);
+  const [adding, setAdding] = useState(false);
+
+  const move = async (idx: number, dir: number) => {
+    const arr = [...media];
+    const j = idx + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[idx], arr[j]] = [arr[j], arr[idx]];
+    await reorderFn({ data: { table: "item_media", ids: arr.map((m) => m.id) } });
+    onSaved();
+  };
+
+  return (
+    <div className="mt-4 rounded-xl border border-dashed border-border/70 p-4">
+      <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        Galeria da cobertura ({media.length})
+      </h4>
+      <div className="space-y-3">
+        {media.map((m, idx) => (
+          <MediaRow
+            key={m.id}
+            m={m}
+            itemId={itemId}
+            canUp={idx > 0}
+            canDown={idx < media.length - 1}
+            onMove={(dir) => move(idx, dir)}
+            onSave={async (payload) => {
+              await saveFn({ data: payload });
+              onSaved();
+            }}
+            onDelete={async () => {
+              await delFn({ data: { id: m.id } });
+              onSaved();
+            }}
+          />
+        ))}
+      </div>
+      {adding ? (
+        <MediaRow
+          m={{ id: "", item_id: itemId, title: "", description: "", media_type: "image", url: null, sort_order: media.length, created_at: "", updated_at: "" }}
+          itemId={itemId}
+          isNew
+          onSave={async (payload) => {
+            await saveFn({ data: { ...payload, sort_order: media.length } });
+            setAdding(false);
+            onSaved();
+          }}
+          onCancel={() => setAdding(false)}
+        />
+      ) : (
+        <button className={`${btnGhost} mt-3`} onClick={() => setAdding(true)}>
+          <Plus className="inline h-4 w-4" /> Adicionar foto/vídeo
+        </button>
+      )}
+    </div>
+  );
+}
+
+function MediaRow({
+  m,
+  itemId,
+  isNew,
+  canUp,
+  canDown,
+  onMove,
+  onSave,
+  onDelete,
+  onCancel,
+}: {
+  m: AdminData["media"][number];
+  itemId: string;
+  isNew?: boolean;
+  canUp?: boolean;
+  canDown?: boolean;
+  onMove?: (dir: number) => void;
+  onSave: (payload: any) => void;
+  onDelete?: () => void;
+  onCancel?: () => void;
+}) {
+  const [f, setF] = useState({
+    id: m.id || undefined,
+    item_id: itemId,
+    title: m.title,
+    description: m.description,
+    media_type: (m.media_type === "video" ? "video" : "image") as "image" | "video",
+    url: m.url ?? "",
+  });
+  const set = (k: string, v: string | null) => setF({ ...f, [k]: v });
+
+  return (
+    <div className="rounded-lg border border-border/70 bg-background/40 p-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Título" value={f.title} onChange={(v) => set("title", v)} />
+        <SelectField
+          label="Tipo"
+          value={f.media_type}
+          options={["image", "video"]}
+          onChange={(v) => set("media_type", v)}
+        />
+      </div>
+      <div className="mt-3">
+        <label className={labelCls}>Descrição (opcional)</label>
+        <textarea className={`${inputCls} min-h-14`} value={f.description} onChange={(e) => set("description", e.target.value)} />
+      </div>
+      {f.media_type === "video" ? (
+        <div className="mt-3">
+          <Field
+            label="Link do vídeo (YouTube, Instagram, Vimeo)"
+            value={f.url}
+            onChange={(v) => set("url", v)}
+          />
+        </div>
+      ) : (
+        <div className="mt-3">
+          <label className={labelCls}>Foto</label>
+          <ImageField value={f.url || null} onChange={(url) => set("url", url)} />
+        </div>
+      )}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button className={btnPrimary} onClick={() => onSave(f)}>{isNew ? "Adicionar" : "Salvar"}</button>
+        {isNew && onCancel && <button className={btnGhost} onClick={onCancel}>Cancelar</button>}
+        {!isNew && onDelete && <button className={`${btnGhost} text-tomato`} onClick={onDelete}><Trash2 className="inline h-4 w-4" /></button>}
+        {!isNew && onMove && (
+          <>
+            <button className={btnGhost} disabled={!canUp} onClick={() => onMove(-1)}><ArrowUp className="h-4 w-4" /></button>
+            <button className={btnGhost} disabled={!canDown} onClick={() => onMove(1)}><ArrowDown className="h-4 w-4" /></button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BrandsSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
+  const saveFn = useServerFn(saveBrand);
+  const delFn = useServerFn(deleteBrand);
+  const reorderFn = useServerFn(reorder);
+  const [adding, setAdding] = useState(false);
+
+  const move = async (idx: number, dir: number) => {
+    const arr = [...data.brands];
+    const j = idx + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[idx], arr[j]] = [arr[j], arr[idx]];
+    await reorderFn({ data: { table: "brands", ids: arr.map((b) => b.id) } });
+    onSaved();
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Envie os logos (PNG) das marcas que confiam no seu trabalho. Eles aparecem em um carrossel contínuo na home.
+      </p>
+      {data.brands.map((b, idx) => (
+        <BrandRow
+          key={b.id}
+          b={b}
+          canUp={idx > 0}
+          canDown={idx < data.brands.length - 1}
+          onMove={(dir) => move(idx, dir)}
+          onSave={async (payload) => {
+            await saveFn({ data: payload });
+            onSaved();
+          }}
+          onDelete={async () => {
+            await delFn({ data: { id: b.id } });
+            onSaved();
+          }}
+        />
+      ))}
+      {adding ? (
+        <BrandRow
+          b={{ id: "", name: "", logo_url: null, sort_order: data.brands.length, created_at: "", updated_at: "" }}
+          isNew
+          onSave={async (payload) => {
+            await saveFn({ data: { ...payload, sort_order: data.brands.length } });
+            setAdding(false);
+            onSaved();
+          }}
+          onCancel={() => setAdding(false)}
+        />
+      ) : (
+        <button className={btnGhost} onClick={() => setAdding(true)}>
+          <Plus className="inline h-4 w-4" /> Adicionar marca
+        </button>
+      )}
+    </div>
+  );
+}
+
+function BrandRow({
+  b,
+  isNew,
+  canUp,
+  canDown,
+  onMove,
+  onSave,
+  onDelete,
+  onCancel,
+}: {
+  b: AdminData["brands"][number];
+  isNew?: boolean;
+  canUp?: boolean;
+  canDown?: boolean;
+  onMove?: (dir: number) => void;
+  onSave: (payload: any) => void;
+  onDelete?: () => void;
+  onCancel?: () => void;
+}) {
+  const [f, setF] = useState({ id: b.id || undefined, name: b.name, logo_url: b.logo_url });
+  const set = (k: string, v: string | null) => setF({ ...f, [k]: v });
+  return (
+    <div className={cardCls}>
+      <Field label="Nome da marca" value={f.name} onChange={(v) => set("name", v)} />
+      <div className="mt-3">
+        <label className={labelCls}>Logo (PNG)</label>
+        <ImageField value={f.logo_url} onChange={(url) => set("logo_url", url)} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button className={btnPrimary} onClick={() => onSave(f)}>{isNew ? "Adicionar" : "Salvar"}</button>
+        {isNew && onCancel && <button className={btnGhost} onClick={onCancel}>Cancelar</button>}
+        {!isNew && onDelete && <button className={`${btnGhost} text-tomato`} onClick={onDelete}><Trash2 className="inline h-4 w-4" /></button>}
+        {!isNew && onMove && (
+          <>
+            <button className={btnGhost} disabled={!canUp} onClick={() => onMove(-1)}><ArrowUp className="h-4 w-4" /></button>
+            <button className={btnGhost} disabled={!canDown} onClick={() => onMove(1)}><ArrowDown className="h-4 w-4" /></button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
   const saveFn = useServerFn(saveHighlight);
   const delFn = useServerFn(deleteHighlight);
