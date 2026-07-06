@@ -423,6 +423,7 @@ function PageBlock({
 
 function ItemRow({
   item,
+  media,
   isNew,
   canUp,
   canDown,
@@ -430,8 +431,10 @@ function ItemRow({
   onSave,
   onDelete,
   onCancel,
+  onSaved,
 }: {
   item: AdminData["items"][number];
+  media?: AdminData["media"];
   isNew?: boolean;
   canUp?: boolean;
   canDown?: boolean;
@@ -439,6 +442,7 @@ function ItemRow({
   onSave: (payload: any) => void;
   onDelete?: () => void;
   onCancel?: () => void;
+  onSaved?: () => void;
 }) {
   const [f, setF] = useState({
     id: item.id || undefined,
@@ -479,6 +483,9 @@ function ItemRow({
           </>
         )}
       </div>
+      {!isNew && item.id && (
+        <MediaManager itemId={item.id} media={media ?? []} onSaved={onSaved ?? (() => {})} />
+      )}
     </div>
   );
 }
