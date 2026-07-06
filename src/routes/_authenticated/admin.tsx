@@ -492,6 +492,7 @@ function ItemRow({
 
 function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
   const saveFn = useServerFn(saveHighlight);
+// placeholder
   const delFn = useServerFn(deleteHighlight);
   const reorderFn = useServerFn(reorder);
   const [adding, setAdding] = useState(false);
