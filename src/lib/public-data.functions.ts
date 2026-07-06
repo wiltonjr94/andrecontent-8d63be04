@@ -119,3 +119,62 @@ export const getPageBySlug = createServerFn({ method: "GET" })
       items: items ?? [],
     };
   });
+
+export interface ItemMedia {
+  id: string;
+  title: string;
+  description: string;
+  media_type: string;
+  url: string | null;
+}
+
+export interface ItemDetail {
+  item: {
+    id: string;
+    title: string;
+    description: string;
+    image_url: string | null;
+    video_url: string | null;
+    item_date: string | null;
+    link: string | null;
+    page_slug: string | null;
+    page_title: string | null;
+  } | null;
+  media: ItemMedia[];
+}
+
+export const getItemById = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ id: z.string() }).parse(data))
+  .handler(async ({ data }): Promise<ItemDetail> => {
+    const supabase = publicClient();
+    const { data: item } = await supabase
+      .from("content_items")
+      .select("id, title, description, image_url, video_url, item_date, link, page_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!item) return { item: null, media: [] };
+    const { data: page } = await supabase
+      .from("pages")
+      .select("slug, title")
+      .eq("id", item.page_id)
+      .maybeSingle();
+    const { data: media } = await supabase
+      .from("item_media")
+      .select("id, title, description, media_type, url")
+      .eq("item_id", item.id)
+      .order("sort_order");
+    return {
+      item: {
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        image_url: item.image_url,
+        video_url: item.video_url,
+        item_date: item.item_date,
+        link: item.link,
+        page_slug: page?.slug ?? null,
+        page_title: page?.title ?? null,
+      },
+      media: media ?? [],
+    };
+  });
