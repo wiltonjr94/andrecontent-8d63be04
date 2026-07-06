@@ -242,7 +242,7 @@ export const reorder = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z
       .object({
-        table: z.enum(["pages", "content_items", "highlights"]),
+        table: z.enum(["pages", "content_items", "highlights", "brands", "item_media"]),
         ids: z.array(z.string()),
       })
       .parse(d),
