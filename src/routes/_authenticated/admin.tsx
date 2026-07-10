@@ -363,6 +363,23 @@ function ThemeSection({ data, onSaved }: { data: AdminData; onSaved: () => void 
         <SelectField label="Fonte dos títulos" value={form.font_display} options={fonts} onChange={(v) => set("font_display", v)} />
         <SelectField label="Fonte do corpo" value={form.font_body} options={fonts} onChange={(v) => set("font_body", v)} />
       </div>
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <h3 className="text-sm font-semibold">Fontes personalizadas (arquivos enviados)</h3>
+        <p className="text-xs text-muted-foreground">
+          Envie arquivos .woff2, .woff, .ttf ou .otf. A fonte enviada substitui a seleção acima.
+          Os títulos e os textos são controlados separadamente.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelCls}>Fonte dos títulos</label>
+            <FontField value={(form as any).custom_font_display_url || ""} onChange={(url) => set("custom_font_display_url", url)} />
+          </div>
+          <div>
+            <label className={labelCls}>Fonte dos textos</label>
+            <FontField value={(form as any).custom_font_body_url || ""} onChange={(url) => set("custom_font_body_url", url)} />
+          </div>
+        </div>
+      </div>
       <button
         className={btnPrimary}
         disabled={busy}
