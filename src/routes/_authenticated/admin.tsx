@@ -20,6 +20,7 @@ import {
   deleteMedia,
 } from "@/lib/admin.functions";
 import { ArrowDown, ArrowUp, LogOut, Trash2, Plus } from "lucide-react";
+import { DEFAULT_LAYOUT, mergeLayout, type HomeLayout } from "@/lib/public-data.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   loader: () => getAdminData(),
