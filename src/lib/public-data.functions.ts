@@ -15,12 +15,14 @@ export interface SiteBundle {
   site: {
     name: string;
     avatar_url: string | null;
+    logo_url: string;
     hero_title: string;
     hero_subtitle: string;
     whatsapp: string;
     instagram: string;
     linkedin: string;
     email: string;
+    layout: HomeLayout;
   };
   theme: {
     color_denim: string;
@@ -29,22 +31,63 @@ export interface SiteBundle {
     color_runway: string;
     font_display: string;
     font_body: string;
+    custom_font_display_url: string;
+    custom_font_body_url: string;
   };
   pages: { slug: string; title: string; description: string }[];
   highlights: { id: string; title: string; image_url: string | null; link: string }[];
   brands: { id: string; name: string; logo_url: string | null }[];
 }
 
+/** Size & position controls for the images on the home page. */
+export interface HomeLayout {
+  /** Header logo height in px. */
+  logo_height: number;
+  /** Hero image max width in px. */
+  hero_max_width: number;
+  /** Hero vertical nudge in px (negative = up). */
+  hero_offset_y: number;
+  /** "Quem sou eu" portrait max width in px. */
+  about_max_width: number;
+  /** Services image max width in px. */
+  services_max_width: number;
+  /** Optional background image override url. */
+  background_url: string | null;
+}
+
+export const DEFAULT_LAYOUT: HomeLayout = {
+  logo_height: 36,
+  hero_max_width: 672,
+  hero_offset_y: 0,
+  about_max_width: 384,
+  services_max_width: 1152,
+  background_url: null,
+};
+
+export function mergeLayout(raw: unknown): HomeLayout {
+  const obj = (raw && typeof raw === "object" ? raw : {}) as Partial<HomeLayout>;
+  return {
+    logo_height: Number(obj.logo_height) || DEFAULT_LAYOUT.logo_height,
+    hero_max_width: Number(obj.hero_max_width) || DEFAULT_LAYOUT.hero_max_width,
+    hero_offset_y: Number(obj.hero_offset_y) || DEFAULT_LAYOUT.hero_offset_y,
+    about_max_width: Number(obj.about_max_width) || DEFAULT_LAYOUT.about_max_width,
+    services_max_width: Number(obj.services_max_width) || DEFAULT_LAYOUT.services_max_width,
+    background_url: (obj.background_url as string) || null,
+  };
+}
+
 const DEFAULT_BUNDLE: SiteBundle = {
   site: {
     name: "André",
     avatar_url: null,
+    logo_url: "",
     hero_title: "Oi, eu sou o André",
     hero_subtitle: "",
     whatsapp: "",
     instagram: "",
     linkedin: "",
     email: "",
+    layout: DEFAULT_LAYOUT,
   },
   theme: {
     color_denim: "#1E2540",
@@ -53,6 +96,8 @@ const DEFAULT_BUNDLE: SiteBundle = {
     color_runway: "#2D6CDF",
     font_display: "Space Grotesk",
     font_body: "DM Sans",
+    custom_font_display_url: "",
+    custom_font_body_url: "",
   },
   pages: [],
   highlights: [],
@@ -74,7 +119,9 @@ export const getSiteBundle = createServerFn({ method: "GET" }).handler(
         supabase.from("brands").select("id, name, logo_url").order("sort_order"),
       ]);
       return {
-        site: siteRes.data ?? DEFAULT_BUNDLE.site,
+        site: siteRes.data
+          ? { ...siteRes.data, layout: mergeLayout((siteRes.data as any).layout) }
+          : DEFAULT_BUNDLE.site,
         theme: themeRes.data ?? DEFAULT_BUNDLE.theme,
         pages: pagesRes.data ?? [],
         highlights: highlightsRes.data ?? [],
