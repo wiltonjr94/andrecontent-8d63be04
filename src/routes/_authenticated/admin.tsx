@@ -244,10 +244,20 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
   const [form, setForm] = useState(data.site!);
   const [busy, setBusy] = useState(false);
   const set = (k: string, v: string) => setForm({ ...form, [k]: v });
+  const [layout, setLayout] = useState<HomeLayout>(mergeLayout((data.site as any)?.layout));
+  const setL = (k: keyof HomeLayout, v: number | string | null) =>
+    setLayout({ ...layout, [k]: v } as HomeLayout);
 
   return (
     <div className={`${cardCls} space-y-4`}>
-      <ImageField value={form.avatar_url} onChange={(url) => set("avatar_url", url)} />
+      <div>
+        <label className={labelCls}>Logo do topo (aparece no menu)</label>
+        <ImageField value={(form as any).logo_url || null} onChange={(url) => set("logo_url", url)} />
+      </div>
+      <div>
+        <label className={labelCls}>Avatar / foto de apoio</label>
+        <ImageField value={form.avatar_url} onChange={(url) => set("avatar_url", url)} />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nome" value={form.name} onChange={(v) => set("name", v)} />
         <Field label="Título do hero" value={form.hero_title} onChange={(v) => set("hero_title", v)} />
@@ -266,13 +276,43 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         <Field label="Instagram" value={form.instagram} onChange={(v) => set("instagram", v)} />
         <Field label="LinkedIn" value={form.linkedin} onChange={(v) => set("linkedin", v)} />
       </div>
+
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Tamanho e posição das imagens (página inicial)</h3>
+          <button
+            type="button"
+            className={btnGhost}
+            onClick={() => setLayout(DEFAULT_LAYOUT)}
+          >
+            Restaurar padrão
+          </button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <RangeField label="Altura da logo do topo" value={layout.logo_height} min={20} max={120} onChange={(v) => setL("logo_height", v)} />
+          <RangeField label="Largura do hero" value={layout.hero_max_width} min={300} max={1200} step={10} onChange={(v) => setL("hero_max_width", v)} />
+          <RangeField label="Posição vertical do hero" value={layout.hero_offset_y} min={-120} max={120} onChange={(v) => setL("hero_offset_y", v)} />
+          <RangeField label="Largura da foto 'Quem sou eu'" value={layout.about_max_width} min={200} max={800} step={10} onChange={(v) => setL("about_max_width", v)} />
+          <RangeField label="Largura da imagem de serviços" value={layout.services_max_width} min={400} max={1400} step={10} onChange={(v) => setL("services_max_width", v)} />
+        </div>
+        <div>
+          <label className={labelCls}>Imagem de fundo (opcional — substitui o azul padrão)</label>
+          <ImageField value={layout.background_url} onChange={(url) => setL("background_url", url)} />
+          {layout.background_url && (
+            <button type="button" className={`${btnGhost} mt-2 text-tomato`} onClick={() => setL("background_url", null)}>
+              Remover fundo personalizado
+            </button>
+          )}
+        </div>
+      </div>
+
       <button
         className={btnPrimary}
         disabled={busy}
         onClick={async () => {
           setBusy(true);
           try {
-            await save({ data: form });
+            await save({ data: { ...form, layout } as any });
             onSaved();
           } finally {
             setBusy(false);
