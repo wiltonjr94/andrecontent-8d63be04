@@ -74,6 +74,8 @@
   --color-runway: var(--runway);
   --color-runway-foreground: var(--runway-foreground);
   --color-denim: var(--denim);
+  --color-lime: var(--lime);
+  --color-lime-foreground: var(--lime-foreground);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
 }
@@ -89,6 +91,8 @@
   --tomato-foreground: oklch(0.98 0.01 90);
   --runway: oklch(0.5569 0.1874 261.20);
   --runway-foreground: oklch(0.98 0.01 90);
+  --lime: oklch(0.8642 0.2508 140.5);
+  --lime-foreground: oklch(0.20 0.02 271.63);
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
