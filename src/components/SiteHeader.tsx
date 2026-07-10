@@ -4,14 +4,16 @@ import logo from "@/assets/andre-logo.png.asset.json";
 
 export function SiteHeader() {
   const { site } = useSite();
+  const logoSrc = site.logo_url || logo.url;
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
         <Link to="/" className="group shrink-0" aria-label="Ir para a home">
           <img
-            src={logo.url}
+            src={logoSrc}
             alt={site.name}
-            className="h-8 w-auto transition-transform duration-300 group-hover:scale-105 sm:h-9"
+            style={{ height: `${site.layout.logo_height}px` }}
+            className="w-auto transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
         <nav className="flex shrink-0 items-center gap-4 sm:gap-7">

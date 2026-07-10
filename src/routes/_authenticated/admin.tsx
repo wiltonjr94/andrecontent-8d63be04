@@ -20,6 +20,7 @@ import {
   deleteMedia,
 } from "@/lib/admin.functions";
 import { ArrowDown, ArrowUp, LogOut, Trash2, Plus } from "lucide-react";
+import { DEFAULT_LAYOUT, mergeLayout, type HomeLayout } from "@/lib/public-data.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   loader: () => getAdminData(),
@@ -162,15 +163,101 @@ function ImageField({
   );
 }
 
+function FontField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const upload = useUpload();
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <label className={`${btnGhost} cursor-pointer`}>
+        {busy ? "Enviando..." : value ? "Trocar fonte" : "Enviar fonte"}
+        <input
+          type="file"
+          accept=".woff,.woff2,.ttf,.otf,font/*"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setBusy(true);
+            try {
+              onChange(await upload(file));
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
+      </label>
+      {value && (
+        <>
+          <span className="text-xs text-muted-foreground">Fonte enviada ✓</span>
+          <button type="button" className={`${btnGhost} text-tomato`} onClick={() => onChange("")}>
+            Remover
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RangeField({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  suffix = "px",
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <label className={labelCls}>
+        {label}: <span className="font-semibold text-foreground">{value}{suffix}</span>
+      </label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-runway"
+      />
+    </div>
+  );
+}
+
 function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
   const save = useServerFn(saveSite);
   const [form, setForm] = useState(data.site!);
   const [busy, setBusy] = useState(false);
   const set = (k: string, v: string) => setForm({ ...form, [k]: v });
+  const [layout, setLayout] = useState<HomeLayout>(mergeLayout((data.site as any)?.layout));
+  const setL = (k: keyof HomeLayout, v: number | string | null) =>
+    setLayout({ ...layout, [k]: v } as HomeLayout);
 
   return (
     <div className={`${cardCls} space-y-4`}>
-      <ImageField value={form.avatar_url} onChange={(url) => set("avatar_url", url)} />
+      <div>
+        <label className={labelCls}>Logo do topo (aparece no menu)</label>
+        <ImageField value={(form as any).logo_url || null} onChange={(url) => set("logo_url", url)} />
+      </div>
+      <div>
+        <label className={labelCls}>Avatar / foto de apoio</label>
+        <ImageField value={form.avatar_url} onChange={(url) => set("avatar_url", url)} />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nome" value={form.name} onChange={(v) => set("name", v)} />
         <Field label="Título do hero" value={form.hero_title} onChange={(v) => set("hero_title", v)} />
@@ -189,13 +276,43 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         <Field label="Instagram" value={form.instagram} onChange={(v) => set("instagram", v)} />
         <Field label="LinkedIn" value={form.linkedin} onChange={(v) => set("linkedin", v)} />
       </div>
+
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Tamanho e posição das imagens (página inicial)</h3>
+          <button
+            type="button"
+            className={btnGhost}
+            onClick={() => setLayout(DEFAULT_LAYOUT)}
+          >
+            Restaurar padrão
+          </button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <RangeField label="Altura da logo do topo" value={layout.logo_height} min={20} max={120} onChange={(v) => setL("logo_height", v)} />
+          <RangeField label="Largura do hero" value={layout.hero_max_width} min={300} max={1200} step={10} onChange={(v) => setL("hero_max_width", v)} />
+          <RangeField label="Posição vertical do hero" value={layout.hero_offset_y} min={-120} max={120} onChange={(v) => setL("hero_offset_y", v)} />
+          <RangeField label="Largura da foto 'Quem sou eu'" value={layout.about_max_width} min={200} max={800} step={10} onChange={(v) => setL("about_max_width", v)} />
+          <RangeField label="Largura da imagem de serviços" value={layout.services_max_width} min={400} max={1400} step={10} onChange={(v) => setL("services_max_width", v)} />
+        </div>
+        <div>
+          <label className={labelCls}>Imagem de fundo (opcional — substitui o azul padrão)</label>
+          <ImageField value={layout.background_url} onChange={(url) => setL("background_url", url)} />
+          {layout.background_url && (
+            <button type="button" className={`${btnGhost} mt-2 text-tomato`} onClick={() => setL("background_url", null)}>
+              Remover fundo personalizado
+            </button>
+          )}
+        </div>
+      </div>
+
       <button
         className={btnPrimary}
         disabled={busy}
         onClick={async () => {
           setBusy(true);
           try {
-            await save({ data: form });
+            await save({ data: { ...form, layout } as any });
             onSaved();
           } finally {
             setBusy(false);
@@ -245,6 +362,23 @@ function ThemeSection({ data, onSaved }: { data: AdminData; onSaved: () => void 
       <div className="grid gap-4 sm:grid-cols-2">
         <SelectField label="Fonte dos títulos" value={form.font_display} options={fonts} onChange={(v) => set("font_display", v)} />
         <SelectField label="Fonte do corpo" value={form.font_body} options={fonts} onChange={(v) => set("font_body", v)} />
+      </div>
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <h3 className="text-sm font-semibold">Fontes personalizadas (arquivos enviados)</h3>
+        <p className="text-xs text-muted-foreground">
+          Envie arquivos .woff2, .woff, .ttf ou .otf. A fonte enviada substitui a seleção acima.
+          Os títulos e os textos são controlados separadamente.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelCls}>Fonte dos títulos</label>
+            <FontField value={(form as any).custom_font_display_url || ""} onChange={(url) => set("custom_font_display_url", url)} />
+          </div>
+          <div>
+            <label className={labelCls}>Fonte dos textos</label>
+            <FontField value={(form as any).custom_font_body_url || ""} onChange={(url) => set("custom_font_body_url", url)} />
+          </div>
+        </div>
       </div>
       <button
         className={btnPrimary}

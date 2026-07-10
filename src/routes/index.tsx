@@ -16,6 +16,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { site, highlights, brands } = useSite();
+  const layout = site.layout;
+  const bgUrl = layout.background_url || bgAzul.url;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -23,7 +25,7 @@ function Index() {
       <div
         aria-hidden
         className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${bgAzul.url})` }}
+        style={{ backgroundImage: `url(${bgUrl})` }}
       />
 
       <SiteHeader />
@@ -35,7 +37,11 @@ function Index() {
           <img
             src={heroImg.url}
             alt={site.hero_title}
-            className="fade-up w-full max-w-2xl object-contain"
+            style={{
+              maxWidth: `${layout.hero_max_width}px`,
+              transform: `translateY(${layout.hero_offset_y}px)`,
+            }}
+            className="fade-up w-full object-contain"
           />
         </section>
 
@@ -49,7 +55,8 @@ function Index() {
               src={quemSouEu.url}
               alt="André"
               loading="lazy"
-              className="w-full max-w-sm object-contain"
+              style={{ maxWidth: `${layout.about_max_width}px` }}
+              className="w-full object-contain"
             />
           </div>
           <div>
@@ -77,11 +84,12 @@ function Index() {
         </section>
 
         {/* Serviços disponibilizados */}
-        <section className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
+        <section className="mx-auto mt-20 flex max-w-6xl justify-center px-5 sm:mt-28 sm:px-8">
           <img
             src={servicos.url}
             alt="Serviços disponibilizados"
             loading="lazy"
+            style={{ maxWidth: `${layout.services_max_width}px` }}
             className="w-full rounded-3xl object-cover"
           />
         </section>
