@@ -163,6 +163,82 @@ function ImageField({
   );
 }
 
+function FontField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const upload = useUpload();
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <label className={`${btnGhost} cursor-pointer`}>
+        {busy ? "Enviando..." : value ? "Trocar fonte" : "Enviar fonte"}
+        <input
+          type="file"
+          accept=".woff,.woff2,.ttf,.otf,font/*"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setBusy(true);
+            try {
+              onChange(await upload(file));
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
+      </label>
+      {value && (
+        <>
+          <span className="text-xs text-muted-foreground">Fonte enviada ✓</span>
+          <button type="button" className={`${btnGhost} text-tomato`} onClick={() => onChange("")}>
+            Remover
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RangeField({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  suffix = "px",
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <label className={labelCls}>
+        {label}: <span className="font-semibold text-foreground">{value}{suffix}</span>
+      </label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-runway"
+      />
+    </div>
+  );
+}
+
 function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
   const save = useServerFn(saveSite);
   const [form, setForm] = useState(data.site!);
