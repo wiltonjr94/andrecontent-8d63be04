@@ -203,7 +203,9 @@ export type Database = {
           hero_title: string
           id: string
           instagram: string
+          layout: Json
           linkedin: string
+          logo_url: string
           name: string
           updated_at: string
           whatsapp: string
@@ -215,7 +217,9 @@ export type Database = {
           hero_title?: string
           id?: string
           instagram?: string
+          layout?: Json
           linkedin?: string
+          logo_url?: string
           name?: string
           updated_at?: string
           whatsapp?: string
@@ -227,7 +231,9 @@ export type Database = {
           hero_title?: string
           id?: string
           instagram?: string
+          layout?: Json
           linkedin?: string
+          logo_url?: string
           name?: string
           updated_at?: string
           whatsapp?: string
@@ -240,6 +246,8 @@ export type Database = {
           color_denim: string
           color_runway: string
           color_tomato: string
+          custom_font_body_url: string
+          custom_font_display_url: string
           font_body: string
           font_display: string
           id: string
@@ -250,6 +258,8 @@ export type Database = {
           color_denim?: string
           color_runway?: string
           color_tomato?: string
+          custom_font_body_url?: string
+          custom_font_display_url?: string
           font_body?: string
           font_display?: string
           id?: string
@@ -260,6 +270,8 @@ export type Database = {
           color_denim?: string
           color_runway?: string
           color_tomato?: string
+          custom_font_body_url?: string
+          custom_font_display_url?: string
           font_body?: string
           font_display?: string
           id?: string
