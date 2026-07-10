@@ -1,75 +1,101 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, MessageCircle } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { MessageCircle } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { HighlightSlider } from "@/components/HighlightSlider";
+import { ProjectsGrid } from "@/components/ProjectsGrid";
 import { BrandsMarquee } from "@/components/BrandsMarquee";
 import { useSite } from "@/lib/site-context";
+import bgAzul from "@/assets/bg-azul.png.asset.json";
+import heroImg from "@/assets/hero.png.asset.json";
+import quemSouEu from "@/assets/quem-sou-eu.png.asset.json";
+import servicos from "@/assets/servicos.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const { site, pages, highlights, brands } = useSite();
+  const { site, highlights, brands } = useSite();
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Fundo azul global */}
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 bg-cover bg-center"
+        style={{ backgroundImage: `url(${bgAzul.url})` }}
+      />
+
       <SiteHeader />
 
-      <main className="mx-auto max-w-6xl px-5 pt-32 sm:px-8 sm:pt-40">
+      <main>
         {/* Hero */}
-        <section className="fade-up">
-          <h1 className="max-w-4xl text-5xl font-bold leading-[1.02] text-butter sm:text-7xl md:text-8xl">
-            {site.hero_title}
-          </h1>
-          <p className="mt-8 max-w-2xl text-lg text-foreground/80 sm:text-xl">
-            {site.hero_subtitle}
-          </p>
-          <a
-            href={site.whatsapp}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-10 inline-flex items-center gap-2 rounded-full bg-tomato px-7 py-3.5 text-base font-semibold text-tomato-foreground transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110"
-          >
-            <MessageCircle className="h-5 w-5" /> Diga oi
-          </a>
+        <section className="relative mx-auto flex max-w-6xl flex-col items-center px-5 pt-28 sm:px-8 sm:pt-32">
+          <h1 className="sr-only">{site.hero_title}</h1>
+          <img
+            src={heroImg.url}
+            alt={site.hero_title}
+            className="fade-up w-full max-w-2xl object-contain"
+          />
         </section>
 
-        {/* Brands marquee */}
-        <BrandsMarquee brands={brands} />
-
-        {/* Category cards */}
-        <section className="mt-28 sm:mt-36">
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-            Explore
-          </h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {pages.map((p) => (
-              <Link
-                key={p.slug}
-                to="/p/$slug"
-                params={{ slug: p.slug }}
-                className="group relative flex min-h-44 flex-col justify-between overflow-hidden rounded-3xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-butter"
-              >
-                <ArrowUpRight className="h-7 w-7 self-end text-muted-foreground transition-all duration-300 group-hover:text-butter group-hover:translate-x-1 group-hover:-translate-y-1" />
-                <div>
-                  <h3 className="text-2xl font-semibold sm:text-3xl">{p.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{p.description}</p>
-                </div>
-              </Link>
-            ))}
+        {/* Quem sou eu */}
+        <section
+          id="quem-sou-eu"
+          className="mx-auto mt-16 grid max-w-6xl items-center gap-10 px-5 sm:mt-24 sm:px-8 md:grid-cols-2"
+        >
+          <div className="flex justify-center">
+            <img
+              src={quemSouEu.url}
+              alt="André"
+              loading="lazy"
+              className="w-full max-w-sm object-contain"
+            />
+          </div>
+          <div>
+            <h2 className="text-4xl font-bold leading-tight text-butter sm:text-5xl">
+              Mas afinal,<br />quem é o André?
+            </h2>
+            <p className="mt-6 max-w-lg text-lg text-foreground/85">
+              {site.hero_subtitle ||
+                "Publicitário e profissional do audiovisual apaixonado por contar histórias através da imagem. Atuo entre direção criativa, fotografia, vídeo e edição, transformando ideias em narrativas visuais com olhar estratégico e sensibilidade estética."}
+            </p>
+            <a
+              href={site.whatsapp}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-lime px-7 py-3.5 text-base font-semibold text-lime-foreground transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110"
+            >
+              <MessageCircle className="h-5 w-5" /> Fala comigo!
+            </a>
           </div>
         </section>
 
-        {/* Highlights slider */}
-        <section className="mt-28 sm:mt-36">
-          <h2 className="mb-6 text-3xl font-bold sm:text-4xl">Destaques</h2>
-          <HighlightSlider highlights={highlights} />
+        {/* Marcas que confiam */}
+        <section className="mt-20 sm:mt-28">
+          <BrandsMarquee brands={brands} />
+        </section>
+
+        {/* Serviços disponibilizados */}
+        <section className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
+          <img
+            src={servicos.url}
+            alt="Serviços disponibilizados"
+            loading="lazy"
+            className="w-full rounded-3xl object-cover"
+          />
+        </section>
+
+        {/* Projetos recentes */}
+        <section id="projetos" className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
+          <h2 className="mb-8 text-3xl font-bold text-butter sm:text-4xl">
+            Meus últimos projetos
+          </h2>
+          <ProjectsGrid highlights={highlights} />
         </section>
       </main>
 
-      <div className="mt-28 sm:mt-36">
+      <div className="mt-24 sm:mt-32">
         <SiteFooter />
       </div>
     </div>
