@@ -71,12 +71,23 @@ const siteSchema = z.object({
   id: z.string(),
   name: z.string(),
   avatar_url: z.string().nullable().optional(),
+  logo_url: z.string().optional(),
   hero_title: z.string(),
   hero_subtitle: z.string(),
   whatsapp: z.string(),
   instagram: z.string(),
   linkedin: z.string(),
   email: z.string(),
+  layout: z
+    .object({
+      logo_height: z.number(),
+      hero_max_width: z.number(),
+      hero_offset_y: z.number(),
+      about_max_width: z.number(),
+      services_max_width: z.number(),
+      background_url: z.string().nullable(),
+    })
+    .optional(),
 });
 
 export const saveSite = createServerFn({ method: "POST" })
@@ -98,6 +109,8 @@ const themeSchema = z.object({
   color_runway: z.string(),
   font_display: z.string(),
   font_body: z.string(),
+  custom_font_display_url: z.string().optional(),
+  custom_font_body_url: z.string().optional(),
 });
 
 export const saveTheme = createServerFn({ method: "POST" })
