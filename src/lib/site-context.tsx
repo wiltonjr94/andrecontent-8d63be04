@@ -21,7 +21,20 @@ export function useSite(): SiteBundle {
 
 /** Renders an inline <style> that maps DB theme values onto CSS design tokens. */
 export function ThemeStyle({ theme }: { theme: SiteBundle["theme"] }) {
-  const css = `:root{
+  const hasDisplay = !!theme.custom_font_display_url;
+  const hasBody = !!theme.custom_font_body_url;
+  const displayFamily = hasDisplay ? "AndreCustomDisplay" : theme.font_display;
+  const bodyFamily = hasBody ? "AndreCustomBody" : theme.font_body;
+  const faces = `${
+    hasDisplay
+      ? `@font-face{font-family:"AndreCustomDisplay";src:url("${theme.custom_font_display_url}");font-display:swap;}`
+      : ""
+  }${
+    hasBody
+      ? `@font-face{font-family:"AndreCustomBody";src:url("${theme.custom_font_body_url}");font-display:swap;}`
+      : ""
+  }`;
+  const css = `${faces}:root{
   --denim:${theme.color_denim};
   --butter:${theme.color_butter};
   --butter-foreground:${theme.color_denim};
@@ -31,8 +44,8 @@ export function ThemeStyle({ theme }: { theme: SiteBundle["theme"] }) {
   --primary:${theme.color_runway};
   --accent:${theme.color_tomato};
   --ring:${theme.color_runway};
-  --font-display:"${theme.font_display}", ui-sans-serif, system-ui, sans-serif;
-  --font-body:"${theme.font_body}", ui-sans-serif, system-ui, sans-serif;
+  --font-display:"${displayFamily}", ui-sans-serif, system-ui, sans-serif;
+  --font-body:"${bodyFamily}", ui-sans-serif, system-ui, sans-serif;
 }`;
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }
