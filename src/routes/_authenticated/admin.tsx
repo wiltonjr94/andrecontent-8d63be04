@@ -1121,3 +1121,141 @@ function SelectField({
     </div>
   );
 }
+function TextStyleEditor({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: TextStyle;
+  onChange: (patch: Partial<TextStyle>) => void;
+}) {
+  const v = value ?? DEFAULT_TEXT_STYLE;
+  return (
+    <div className="rounded-lg border border-border/60 p-3">
+      <p className="mb-2 text-xs font-medium text-muted-foreground">{label}</p>
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <select
+          className={`${inputCls} w-auto`}
+          value={v.font}
+          onChange={(e) => onChange({ font: e.target.value as "display" | "body" })}
+        >
+          <option value="display">Fonte de título</option>
+          <option value="body">Fonte de texto</option>
+        </select>
+        <label className="flex items-center gap-1">
+          Tamanho
+          <input
+            type="number"
+            className={`${inputCls} w-20`}
+            value={v.size ?? ""}
+            placeholder="auto"
+            onChange={(e) => onChange({ size: e.target.value ? Number(e.target.value) : null })}
+          />
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.bold} onChange={(e) => onChange({ bold: e.target.checked })} /> Negrito
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.italic} onChange={(e) => onChange({ italic: e.target.checked })} /> Itálico
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.underline} onChange={(e) => onChange({ underline: e.target.checked })} /> Sublinhado
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.uppercase} onChange={(e) => onChange({ uppercase: e.target.checked })} /> Maiúsculas
+        </label>
+        <label className="flex items-center gap-1">
+          Cor
+          <input
+            type="color"
+            className="h-8 w-10 rounded border border-input bg-card"
+            value={v.color || "#ffffff"}
+            onChange={(e) => onChange({ color: e.target.value })}
+          />
+          {v.color && (
+            <button type="button" className="text-xs text-tomato" onClick={() => onChange({ color: "" })}>
+              limpar
+            </button>
+          )}
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function FiltersSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
+  const saveFn = useServerFn(saveFilter);
+  const delFn = useServerFn(deleteFilter);
+  const [coverageLabel, setCoverageLabel] = useState("");
+  const [eventLabel, setEventLabel] = useState("");
+
+  const add = async (kind: "coverage" | "event", label: string, reset: () => void) => {
+    if (!label.trim()) return;
+    await saveFn({ data: { kind, label: label.trim(), sort_order: data.filters.length } });
+    reset();
+    onSaved();
+  };
+
+  const Group = ({ kind, title }: { kind: "coverage" | "event"; title: string }) => (
+    <div className={cardCls}>
+      <h3 className="mb-3 text-sm font-semibold">{title}</h3>
+      <div className="space-y-2">
+        {data.filters
+          .filter((f) => f.kind === kind)
+          .map((f) => (
+            <div key={f.id} className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm">
+              <span>{f.label}</span>
+              <button
+                className="text-tomato"
+                onClick={async () => {
+                  await delFn({ data: { id: f.id } });
+                  onSaved();
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        Defina os filtros usados na busca da página "Trabalhos".
+      </p>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-3">
+          <Group kind="coverage" title="Tipo de cobertura" />
+          <div className="flex gap-2">
+            <input
+              className={inputCls}
+              placeholder="Ex.: Fotografia"
+              value={coverageLabel}
+              onChange={(e) => setCoverageLabel(e.target.value)}
+            />
+            <button className={btnPrimary} onClick={() => add("coverage", coverageLabel, () => setCoverageLabel(""))}>
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <Group kind="event" title="Tipo de evento" />
+          <div className="flex gap-2">
+            <input
+              className={inputCls}
+              placeholder="Ex.: Corporativo"
+              value={eventLabel}
+              onChange={(e) => setEventLabel(e.target.value)}
+            />
+            <button className={btnPrimary} onClick={() => add("event", eventLabel, () => setEventLabel(""))}>
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
