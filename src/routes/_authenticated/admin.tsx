@@ -18,9 +18,17 @@ import {
   deleteBrand,
   saveMedia,
   deleteMedia,
+  saveFilter,
+  deleteFilter,
 } from "@/lib/admin.functions";
 import { ArrowDown, ArrowUp, LogOut, Trash2, Plus } from "lucide-react";
 import { DEFAULT_LAYOUT, mergeLayout, type HomeLayout } from "@/lib/public-data.functions";
+import {
+  DEFAULT_TEXT_STYLE,
+  mergeTextStyle,
+  TEXT_SLOTS,
+  type TextStyle,
+} from "@/lib/text-style";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   loader: () => getAdminData(),
@@ -35,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   ),
 });
 
-type Tab = "site" | "theme" | "pages" | "highlights" | "brands";
+type Tab = "site" | "theme" | "pages" | "highlights" | "brands" | "filters";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-runway";

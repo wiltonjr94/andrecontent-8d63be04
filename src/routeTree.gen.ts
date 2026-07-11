@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrabalhosRouteImport } from './routes/trabalhos'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -18,6 +19,11 @@ import { Route as ItemIdRouteImport } from './routes/item.$id'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
 
+const TrabalhosRoute = TrabalhosRouteImport.update({
+  id: '/trabalhos',
+  path: '/trabalhos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -62,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/trabalhos': typeof TrabalhosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/item/$id': typeof ItemIdRoute
   '/p/$slug': typeof PSlugRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/trabalhos': typeof TrabalhosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/item/$id': typeof ItemIdRoute
   '/p/$slug': typeof PSlugRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/trabalhos': typeof TrabalhosRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/item/$id': typeof ItemIdRoute
   '/p/$slug': typeof PSlugRoute
@@ -93,6 +102,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sitemap.xml'
+    | '/trabalhos'
     | '/admin'
     | '/item/$id'
     | '/p/$slug'
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sitemap.xml'
+    | '/trabalhos'
     | '/admin'
     | '/item/$id'
     | '/p/$slug'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/sitemap.xml'
+    | '/trabalhos'
     | '/_authenticated/admin'
     | '/item/$id'
     | '/p/$slug'
@@ -123,6 +135,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TrabalhosRoute: typeof TrabalhosRoute
   ItemIdRoute: typeof ItemIdRoute
   PSlugRoute: typeof PSlugRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
@@ -130,6 +143,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trabalhos': {
+      id: '/trabalhos'
+      path: '/trabalhos'
+      fullPath: '/trabalhos'
+      preLoaderRoute: typeof TrabalhosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -205,6 +225,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TrabalhosRoute: TrabalhosRoute,
   ItemIdRoute: ItemIdRoute,
   PSlugRoute: PSlugRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
