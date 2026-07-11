@@ -55,6 +55,7 @@ export const getAdminData = createServerFn({ method: "GET" })
       context.supabase.from("highlights").select("*").order("sort_order"),
       context.supabase.from("brands").select("*").order("sort_order"),
       context.supabase.from("item_media").select("*").order("sort_order"),
+      context.supabase.from("filter_options").select("*").order("sort_order"),
     ]);
     return {
       site: site.data,
@@ -64,6 +65,7 @@ export const getAdminData = createServerFn({ method: "GET" })
       highlights: highlights.data ?? [],
       brands: brands.data ?? [],
       media: media.data ?? [],
+      filters: [] as any[],
     };
   });
 
