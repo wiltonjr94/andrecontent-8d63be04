@@ -4,7 +4,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProjectsGrid } from "@/components/ProjectsGrid";
 import { BrandsMarquee } from "@/components/BrandsMarquee";
+import { HorizontalScroller } from "@/components/HorizontalScroller";
 import { useSite } from "@/lib/site-context";
+import { mergeTextStyle, textStyleToCss } from "@/lib/text-style";
 import bgAzul from "@/assets/bg-azul.png.asset.json";
 import heroImg from "@/assets/hero.png.asset.json";
 import quemSouEu from "@/assets/quem-sou-eu.png.asset.json";
@@ -17,16 +19,31 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { site, highlights, brands } = useSite();
   const layout = site.layout;
+  const useColorBg = layout.background_mode === "color";
   const bgUrl = layout.background_url || bgAzul.url;
+
+  const styleFor = (slot: string, defaultFont: "display" | "body" = "display") =>
+    textStyleToCss(mergeTextStyle((site.text_styles || {})[slot], defaultFont));
+
+  const featured = highlights.filter((h) => (h as any).featured);
+  const projects = featured.length > 0 ? featured : highlights;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Fundo azul global */}
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${bgUrl})` }}
-      />
+      {/* Fundo global */}
+      {useColorBg ? (
+        <div
+          aria-hidden
+          className="fixed inset-0 -z-10"
+          style={{ backgroundColor: layout.background_color }}
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="fixed inset-0 -z-10 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgUrl})` }}
+        />
+      )}
 
       <SiteHeader />
 
@@ -60,10 +77,10 @@ function Index() {
             />
           </div>
           <div>
-            <h2 className="text-4xl font-bold leading-tight text-butter sm:text-5xl">
+            <h2 className="text-4xl font-bold leading-tight text-butter sm:text-5xl" style={styleFor("about_heading")}>
               Mas afinal,<br />quem é o André?
             </h2>
-            <p className="mt-6 max-w-lg text-lg text-foreground/85">
+            <p className="mt-6 max-w-lg text-lg text-foreground/85 whitespace-pre-line" style={styleFor("about_text", "body")}>
               {site.hero_subtitle ||
                 "Publicitário e profissional do audiovisual apaixonado por contar histórias através da imagem. Atuo entre direção criativa, fotografia, vídeo e edição, transformando ideias em narrativas visuais com olhar estratégico e sensibilidade estética."}
             </p>
@@ -84,22 +101,46 @@ function Index() {
         </section>
 
         {/* Serviços disponibilizados */}
-        <section className="mx-auto mt-20 flex max-w-6xl justify-center px-5 sm:mt-28 sm:px-8">
-          <img
-            src={servicos.url}
-            alt="Serviços disponibilizados"
-            loading="lazy"
-            style={{ maxWidth: `${layout.services_max_width}px` }}
-            className="w-full rounded-3xl object-cover"
-          />
+        <section className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
+          <div className="flex justify-center">
+            <img
+              src={servicos.url}
+              alt="Serviços disponibilizados"
+              loading="lazy"
+              style={{ maxWidth: `${layout.services_max_width}px` }}
+              className="w-full rounded-3xl object-cover"
+            />
+          </div>
+          <h2
+            className="mt-10 text-center text-3xl font-bold uppercase text-butter sm:text-4xl"
+            style={styleFor("services_title")}
+          >
+            {site.services_title || "SERVIÇOS DISPONIBILIZADOS"}
+          </h2>
+          <p
+            className="mx-auto mt-3 max-w-2xl text-center text-lg text-foreground/85"
+            style={styleFor("services_subtitle", "body")}
+          >
+            {site.services_subtitle ||
+              "Impulsione a sua empresa com vídeos incríveis e conquiste os melhores resultados."}
+          </p>
         </section>
 
         {/* Projetos recentes */}
         <section id="projetos" className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
-          <h2 className="mb-8 text-3xl font-bold text-butter sm:text-4xl">
+          <h2
+            className="mb-8 text-center text-3xl font-bold text-butter sm:text-4xl"
+            style={styleFor("projects_title")}
+          >
             Meus últimos projetos
           </h2>
-          <ProjectsGrid highlights={highlights} />
+          <HorizontalScroller>
+            {projects.map((h) => (
+              <div key={h.id} className="w-[85%] shrink-0 snap-start sm:w-[48%]">
+                <ProjectsGrid highlights={[h]} />
+              </div>
+            ))}
+          </HorizontalScroller>
         </section>
       </main>
 
