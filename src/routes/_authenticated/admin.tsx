@@ -1012,6 +1012,14 @@ function HighlightRow({
         <label className={labelCls}>Imagem</label>
         <ImageField value={f.image_url} onChange={(url) => set("image_url", url)} />
       </div>
+      <label className="mt-3 flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={f.featured}
+          onChange={(e) => setF({ ...f, featured: e.target.checked })}
+        />
+        Exibir em "Meus últimos projetos" (destaque na home)
+      </label>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button className={btnPrimary} onClick={() => onSave(f)}>{isNew ? "Adicionar" : "Salvar"}</button>
         {isNew && onCancel && <button className={btnGhost} onClick={onCancel}>Cancelar</button>}
