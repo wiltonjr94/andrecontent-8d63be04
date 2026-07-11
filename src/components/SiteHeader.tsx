@@ -19,7 +19,7 @@ export function SiteHeader() {
         <nav className="flex shrink-0 items-center gap-4 sm:gap-7">
           <NavLink href="/">Página inicial</NavLink>
           <NavLink href="/#quem-sou-eu">Sobre</NavLink>
-          <NavLink href="/#projetos">Trabalhos</NavLink>
+          <NavLink href="/trabalhos">Trabalhos</NavLink>
           <a
             href={site.whatsapp}
             target="_blank"

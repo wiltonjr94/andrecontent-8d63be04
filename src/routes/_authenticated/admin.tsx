@@ -18,9 +18,17 @@ import {
   deleteBrand,
   saveMedia,
   deleteMedia,
+  saveFilter,
+  deleteFilter,
 } from "@/lib/admin.functions";
 import { ArrowDown, ArrowUp, LogOut, Trash2, Plus } from "lucide-react";
 import { DEFAULT_LAYOUT, mergeLayout, type HomeLayout } from "@/lib/public-data.functions";
+import {
+  DEFAULT_TEXT_STYLE,
+  mergeTextStyle,
+  TEXT_SLOTS,
+  type TextStyle,
+} from "@/lib/text-style";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   loader: () => getAdminData(),
@@ -35,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   ),
 });
 
-type Tab = "site" | "theme" | "pages" | "highlights" | "brands";
+type Tab = "site" | "theme" | "pages" | "highlights" | "brands" | "filters";
 
 const inputCls =
   "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-runway";
@@ -88,6 +96,7 @@ function AdminPage() {
               ["pages", "Páginas & Itens"],
               ["highlights", "Destaques"],
               ["brands", "Marcas"],
+            ["filters", "Filtros"],
             ] as [Tab, string][]
           ).map(([id, label]) => (
             <button
@@ -109,6 +118,7 @@ function AdminPage() {
         {tab === "pages" && <PagesSection data={data} onSaved={refresh} />}
         {tab === "highlights" && <HighlightsSection data={data} onSaved={refresh} />}
         {tab === "brands" && <BrandsSection data={data} onSaved={refresh} />}
+        {tab === "filters" && <FiltersSection data={data} onSaved={refresh} />}
       </main>
     </div>
   );
@@ -247,6 +257,16 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
   const [layout, setLayout] = useState<HomeLayout>(mergeLayout((data.site as any)?.layout));
   const setL = (k: keyof HomeLayout, v: number | string | null) =>
     setLayout({ ...layout, [k]: v } as HomeLayout);
+  const [styles, setStyles] = useState<Record<string, TextStyle>>(
+    () => {
+      const src = ((data.site as any)?.text_styles ?? {}) as Record<string, unknown>;
+      const out: Record<string, TextStyle> = {};
+      for (const slot of TEXT_SLOTS) out[slot.key] = mergeTextStyle(src[slot.key], slot.defaultFont);
+      return out;
+    },
+  );
+  const setStyle = (key: string, patch: Partial<TextStyle>) =>
+    setStyles((s) => ({ ...s, [key]: { ...s[key], ...patch } }));
 
   return (
     <div className={`${cardCls} space-y-4`}>
@@ -277,6 +297,48 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         <Field label="LinkedIn" value={form.linkedin} onChange={(v) => set("linkedin", v)} />
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Título dos serviços" value={(form as any).services_title || ""} onChange={(v) => set("services_title", v)} />
+        <Field label="Subtítulo dos serviços" value={(form as any).services_subtitle || ""} onChange={(v) => set("services_subtitle", v)} />
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <h3 className="text-sm font-semibold">Fundo da página inicial</h3>
+        <div className="flex gap-4 text-sm">
+          <label className="flex items-center gap-2">
+            <input type="radio" checked={layout.background_mode === "image"} onChange={() => setL("background_mode", "image")} />
+            Imagem
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" checked={layout.background_mode === "color"} onChange={() => setL("background_mode", "color")} />
+            Cor sólida
+          </label>
+        </div>
+        {layout.background_mode === "color" ? (
+          <div>
+            <label className={labelCls}>Cor de fundo</label>
+            <input type="color" className="h-10 w-20 rounded border border-input bg-card" value={layout.background_color} onChange={(e) => setL("background_color", e.target.value)} />
+          </div>
+        ) : (
+          <div>
+            <label className={labelCls}>Imagem de fundo (opcional — substitui o azul padrão)</label>
+            <ImageField value={layout.background_url} onChange={(url) => setL("background_url", url)} />
+            {layout.background_url && (
+              <button type="button" className={`${btnGhost} mt-2 text-tomato`} onClick={() => setL("background_url", null)}>
+                Remover fundo personalizado
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <h3 className="text-sm font-semibold">Estilo dos textos</h3>
+        {TEXT_SLOTS.map((slot) => (
+          <TextStyleEditor key={slot.key} label={slot.label} value={styles[slot.key]} onChange={(p) => setStyle(slot.key, p)} />
+        ))}
+      </div>
+
       <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Tamanho e posição das imagens (página inicial)</h3>
@@ -295,15 +357,6 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
           <RangeField label="Largura da foto 'Quem sou eu'" value={layout.about_max_width} min={200} max={800} step={10} onChange={(v) => setL("about_max_width", v)} />
           <RangeField label="Largura da imagem de serviços" value={layout.services_max_width} min={400} max={1400} step={10} onChange={(v) => setL("services_max_width", v)} />
         </div>
-        <div>
-          <label className={labelCls}>Imagem de fundo (opcional — substitui o azul padrão)</label>
-          <ImageField value={layout.background_url} onChange={(url) => setL("background_url", url)} />
-          {layout.background_url && (
-            <button type="button" className={`${btnGhost} mt-2 text-tomato`} onClick={() => setL("background_url", null)}>
-              Remover fundo personalizado
-            </button>
-          )}
-        </div>
       </div>
 
       <button
@@ -312,7 +365,7 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         onClick={async () => {
           setBusy(true);
           try {
-            await save({ data: { ...form, layout } as any });
+            await save({ data: { ...form, layout, text_styles: styles } as any });
             onSaved();
           } finally {
             setBusy(false);
@@ -443,6 +496,7 @@ function PagesSection({ data, onSaved }: { data: AdminData; onSaved: () => void 
           page={page}
           items={data.items.filter((i) => i.page_id === page.id)}
           allMedia={data.media}
+          filters={data.filters}
           canUp={idx > 0}
           canDown={idx < data.pages.length - 1}
           onMove={(dir) => move(idx, dir)}
@@ -465,6 +519,7 @@ function PageBlock({
   page,
   items,
   allMedia,
+  filters,
   canUp,
   canDown,
   onMove,
@@ -475,6 +530,7 @@ function PageBlock({
   page: AdminData["pages"][number];
   items: AdminData["items"];
   allMedia: AdminData["media"];
+  filters: AdminData["filters"];
   canUp: boolean;
   canDown: boolean;
   onMove: (dir: number) => void;
@@ -519,6 +575,7 @@ function PageBlock({
               key={item.id}
               item={item}
               media={allMedia.filter((m) => m.item_id === item.id)}
+              filters={filters}
               canUp={idx > 0}
               canDown={idx < items.length - 1}
               onMove={(dir) => moveItem(idx, dir)}
@@ -536,7 +593,8 @@ function PageBlock({
         </div>
         {adding ? (
           <ItemRow
-            item={{ id: "", page_id: page.id, title: "", description: "", image_url: null, video_url: null, item_date: null, link: null, sort_order: items.length, created_at: "", updated_at: "" }}
+            item={{ id: "", page_id: page.id, title: "", description: "", image_url: null, video_url: null, item_date: null, link: null, coverage: null, event_type: null, sort_order: items.length, created_at: "", updated_at: "" }}
+            filters={filters}
             isNew
             onSave={async (payload) => {
               await saveItemFn({ data: { ...payload, sort_order: items.length } });
@@ -558,6 +616,7 @@ function PageBlock({
 function ItemRow({
   item,
   media,
+  filters,
   isNew,
   canUp,
   canDown,
@@ -569,6 +628,7 @@ function ItemRow({
 }: {
   item: AdminData["items"][number];
   media?: AdminData["media"];
+  filters?: AdminData["filters"];
   isNew?: boolean;
   canUp?: boolean;
   canDown?: boolean;
@@ -586,14 +646,38 @@ function ItemRow({
     image_url: item.image_url,
     link: item.link ?? "",
     item_date: item.item_date ?? "",
+    coverage: item.coverage ?? "",
+    event_type: item.event_type ?? "",
   });
   const set = (k: string, v: string | null) => setF({ ...f, [k]: v });
+  const coverageOpts = (filters ?? []).filter((x) => x.kind === "coverage");
+  const eventOpts = (filters ?? []).filter((x) => x.kind === "event");
 
   return (
     <div className="rounded-xl border border-border/70 bg-background/40 p-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Título" value={f.title} onChange={(v) => set("title", v)} />
         <Field label="Data" value={f.item_date} onChange={(v) => set("item_date", v)} type="date" />
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Tipo de cobertura</label>
+          <select className={inputCls} value={f.coverage} onChange={(e) => set("coverage", e.target.value)}>
+            <option value="">—</option>
+            {coverageOpts.map((o) => (
+              <option key={o.id} value={o.label}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Tipo de evento</label>
+          <select className={inputCls} value={f.event_type} onChange={(e) => set("event_type", e.target.value)}>
+            <option value="">—</option>
+            {eventOpts.map((o) => (
+              <option key={o.id} value={o.label}>{o.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className="mt-3">
         <label className={labelCls}>Descrição</label>
@@ -905,7 +989,7 @@ function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => 
       ))}
       {adding ? (
         <HighlightRow
-          h={{ id: "", title: "", image_url: null, link: "/", sort_order: data.highlights.length, created_at: "", updated_at: "" }}
+          h={{ id: "", title: "", image_url: null, link: "/", featured: false, sort_order: data.highlights.length, created_at: "", updated_at: "" }}
           pages={data.pages}
           isNew
           onSave={async (payload) => {
@@ -945,7 +1029,7 @@ function HighlightRow({
   onDelete?: () => void;
   onCancel?: () => void;
 }) {
-  const [f, setF] = useState({ id: h.id || undefined, title: h.title, image_url: h.image_url, link: h.link });
+  const [f, setF] = useState({ id: h.id || undefined, title: h.title, image_url: h.image_url, link: h.link, featured: !!h.featured });
   const set = (k: string, v: string | null) => setF({ ...f, [k]: v });
   return (
     <div className={cardCls}>
@@ -971,6 +1055,14 @@ function HighlightRow({
         <label className={labelCls}>Imagem</label>
         <ImageField value={f.image_url} onChange={(url) => set("image_url", url)} />
       </div>
+      <label className="mt-3 flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={f.featured}
+          onChange={(e) => setF({ ...f, featured: e.target.checked })}
+        />
+        Exibir em "Meus últimos projetos" (destaque na home)
+      </label>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button className={btnPrimary} onClick={() => onSave(f)}>{isNew ? "Adicionar" : "Salvar"}</button>
         {isNew && onCancel && <button className={btnGhost} onClick={onCancel}>Cancelar</button>}
@@ -1026,6 +1118,144 @@ function SelectField({
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+function TextStyleEditor({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: TextStyle;
+  onChange: (patch: Partial<TextStyle>) => void;
+}) {
+  const v = value ?? DEFAULT_TEXT_STYLE;
+  return (
+    <div className="rounded-lg border border-border/60 p-3">
+      <p className="mb-2 text-xs font-medium text-muted-foreground">{label}</p>
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <select
+          className={`${inputCls} w-auto`}
+          value={v.font}
+          onChange={(e) => onChange({ font: e.target.value as "display" | "body" })}
+        >
+          <option value="display">Fonte de título</option>
+          <option value="body">Fonte de texto</option>
+        </select>
+        <label className="flex items-center gap-1">
+          Tamanho
+          <input
+            type="number"
+            className={`${inputCls} w-20`}
+            value={v.size ?? ""}
+            placeholder="auto"
+            onChange={(e) => onChange({ size: e.target.value ? Number(e.target.value) : null })}
+          />
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.bold} onChange={(e) => onChange({ bold: e.target.checked })} /> Negrito
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.italic} onChange={(e) => onChange({ italic: e.target.checked })} /> Itálico
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.underline} onChange={(e) => onChange({ underline: e.target.checked })} /> Sublinhado
+        </label>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={v.uppercase} onChange={(e) => onChange({ uppercase: e.target.checked })} /> Maiúsculas
+        </label>
+        <label className="flex items-center gap-1">
+          Cor
+          <input
+            type="color"
+            className="h-8 w-10 rounded border border-input bg-card"
+            value={v.color || "#ffffff"}
+            onChange={(e) => onChange({ color: e.target.value })}
+          />
+          {v.color && (
+            <button type="button" className="text-xs text-tomato" onClick={() => onChange({ color: "" })}>
+              limpar
+            </button>
+          )}
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function FiltersSection({ data, onSaved }: { data: AdminData; onSaved: () => void }) {
+  const saveFn = useServerFn(saveFilter);
+  const delFn = useServerFn(deleteFilter);
+  const [coverageLabel, setCoverageLabel] = useState("");
+  const [eventLabel, setEventLabel] = useState("");
+
+  const add = async (kind: "coverage" | "event", label: string, reset: () => void) => {
+    if (!label.trim()) return;
+    await saveFn({ data: { kind, label: label.trim(), sort_order: data.filters.length } });
+    reset();
+    onSaved();
+  };
+
+  const Group = ({ kind, title }: { kind: "coverage" | "event"; title: string }) => (
+    <div className={cardCls}>
+      <h3 className="mb-3 text-sm font-semibold">{title}</h3>
+      <div className="space-y-2">
+        {data.filters
+          .filter((f) => f.kind === kind)
+          .map((f) => (
+            <div key={f.id} className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm">
+              <span>{f.label}</span>
+              <button
+                className="text-tomato"
+                onClick={async () => {
+                  await delFn({ data: { id: f.id } });
+                  onSaved();
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        Defina os filtros usados na busca da página "Trabalhos".
+      </p>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-3">
+          <Group kind="coverage" title="Tipo de cobertura" />
+          <div className="flex gap-2">
+            <input
+              className={inputCls}
+              placeholder="Ex.: Fotografia"
+              value={coverageLabel}
+              onChange={(e) => setCoverageLabel(e.target.value)}
+            />
+            <button className={btnPrimary} onClick={() => add("coverage", coverageLabel, () => setCoverageLabel(""))}>
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <Group kind="event" title="Tipo de evento" />
+          <div className="flex gap-2">
+            <input
+              className={inputCls}
+              placeholder="Ex.: Corporativo"
+              value={eventLabel}
+              onChange={(e) => setEventLabel(e.target.value)}
+            />
+            <button className={btnPrimary} onClick={() => add("event", eventLabel, () => setEventLabel(""))}>
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

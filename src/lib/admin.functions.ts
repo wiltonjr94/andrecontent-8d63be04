@@ -47,7 +47,7 @@ export const getAdminData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const [site, theme, pages, items, highlights, brands, media] = await Promise.all([
+    const [site, theme, pages, items, highlights, brands, media, filters] = await Promise.all([
       context.supabase.from("site_settings").select("*").limit(1).maybeSingle(),
       context.supabase.from("theme_settings").select("*").limit(1).maybeSingle(),
       context.supabase.from("pages").select("*").order("sort_order"),
@@ -55,6 +55,7 @@ export const getAdminData = createServerFn({ method: "GET" })
       context.supabase.from("highlights").select("*").order("sort_order"),
       context.supabase.from("brands").select("*").order("sort_order"),
       context.supabase.from("item_media").select("*").order("sort_order"),
+      context.supabase.from("filter_options").select("*").order("sort_order"),
     ]);
     return {
       site: site.data,
@@ -64,6 +65,7 @@ export const getAdminData = createServerFn({ method: "GET" })
       highlights: highlights.data ?? [],
       brands: brands.data ?? [],
       media: media.data ?? [],
+      filters: filters.data ?? [],
     };
   });
 
@@ -78,6 +80,9 @@ const siteSchema = z.object({
   instagram: z.string(),
   linkedin: z.string(),
   email: z.string(),
+  services_title: z.string().optional(),
+  services_subtitle: z.string().optional(),
+  text_styles: z.record(z.string(), z.any()).optional(),
   layout: z
     .object({
       logo_height: z.number(),
@@ -86,6 +91,8 @@ const siteSchema = z.object({
       about_max_width: z.number(),
       services_max_width: z.number(),
       background_url: z.string().nullable(),
+      background_mode: z.enum(["image", "color"]).optional(),
+      background_color: z.string().optional(),
     })
     .optional(),
 });
@@ -174,6 +181,8 @@ const itemSchema = z.object({
   video_url: z.string().nullable().optional(),
   item_date: z.string().nullable().optional(),
   link: z.string().nullable().optional(),
+  coverage: z.string().nullable().optional(),
+  event_type: z.string().nullable().optional(),
   sort_order: z.number().optional(),
 });
 
@@ -190,6 +199,8 @@ export const saveItem = createServerFn({ method: "POST" })
       video_url: data.video_url || null,
       item_date: data.item_date || null,
       link: data.link || null,
+      coverage: data.coverage || null,
+      event_type: data.event_type || null,
     };
     if (data.id) {
       const { error } = await context.supabase.from("content_items").update(payload).eq("id", data.id);
@@ -218,6 +229,7 @@ const highlightSchema = z.object({
   title: z.string().min(1),
   image_url: z.string().nullable().optional(),
   link: z.string(),
+  featured: z.boolean().optional(),
   sort_order: z.number().optional(),
 });
 
@@ -226,7 +238,12 @@ export const saveHighlight = createServerFn({ method: "POST" })
   .inputValidator((d) => highlightSchema.parse(d))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const payload = { title: data.title, image_url: data.image_url || null, link: data.link };
+    const payload = {
+      title: data.title,
+      image_url: data.image_url || null,
+      link: data.link,
+      featured: !!data.featured,
+    };
     if (data.id) {
       const { error } = await context.supabase.from("highlights").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -378,6 +395,44 @@ export const deleteMedia = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from("item_media").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ----- Filter options (coverage / event) -----
+const filterSchema = z.object({
+  id: z.string().optional(),
+  kind: z.enum(["coverage", "event"]),
+  label: z.string().min(1),
+  sort_order: z.number().optional(),
+});
+
+export const saveFilter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => filterSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    if (data.id) {
+      const { error } = await context.supabase
+        .from("filter_options")
+        .update({ kind: data.kind, label: data.label })
+        .eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase
+        .from("filter_options")
+        .insert({ kind: data.kind, label: data.label, sort_order: data.sort_order ?? 0 });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteFilter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("filter_options").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

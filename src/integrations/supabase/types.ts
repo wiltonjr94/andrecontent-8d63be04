@@ -43,8 +43,10 @@ export type Database = {
       }
       content_items: {
         Row: {
+          coverage: string | null
           created_at: string
           description: string
+          event_type: string | null
           id: string
           image_url: string | null
           item_date: string | null
@@ -56,8 +58,10 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          coverage?: string | null
           created_at?: string
           description?: string
+          event_type?: string | null
           id?: string
           image_url?: string | null
           item_date?: string | null
@@ -69,8 +73,10 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          coverage?: string | null
           created_at?: string
           description?: string
+          event_type?: string | null
           id?: string
           image_url?: string | null
           item_date?: string | null
@@ -91,9 +97,34 @@ export type Database = {
           },
         ]
       }
+      filter_options: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       highlights: {
         Row: {
           created_at: string
+          featured: boolean
           id: string
           image_url: string | null
           link: string
@@ -103,6 +134,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          featured?: boolean
           id?: string
           image_url?: string | null
           link?: string
@@ -112,6 +144,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          featured?: boolean
           id?: string
           image_url?: string | null
           link?: string
@@ -207,6 +240,9 @@ export type Database = {
           linkedin: string
           logo_url: string
           name: string
+          services_subtitle: string
+          services_title: string
+          text_styles: Json
           updated_at: string
           whatsapp: string
         }
@@ -221,6 +257,9 @@ export type Database = {
           linkedin?: string
           logo_url?: string
           name?: string
+          services_subtitle?: string
+          services_title?: string
+          text_styles?: Json
           updated_at?: string
           whatsapp?: string
         }
@@ -235,6 +274,9 @@ export type Database = {
           linkedin?: string
           logo_url?: string
           name?: string
+          services_subtitle?: string
+          services_title?: string
+          text_styles?: Json
           updated_at?: string
           whatsapp?: string
         }
