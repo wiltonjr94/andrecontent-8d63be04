@@ -80,6 +80,9 @@ const siteSchema = z.object({
   instagram: z.string(),
   linkedin: z.string(),
   email: z.string(),
+  services_title: z.string().optional(),
+  services_subtitle: z.string().optional(),
+  text_styles: z.record(z.string(), z.any()).optional(),
   layout: z
     .object({
       logo_height: z.number(),
@@ -88,6 +91,8 @@ const siteSchema = z.object({
       about_max_width: z.number(),
       services_max_width: z.number(),
       background_url: z.string().nullable(),
+      background_mode: z.enum(["image", "color"]).optional(),
+      background_color: z.string().optional(),
     })
     .optional(),
 });
@@ -176,6 +181,8 @@ const itemSchema = z.object({
   video_url: z.string().nullable().optional(),
   item_date: z.string().nullable().optional(),
   link: z.string().nullable().optional(),
+  coverage: z.string().nullable().optional(),
+  event_type: z.string().nullable().optional(),
   sort_order: z.number().optional(),
 });
 
@@ -192,6 +199,8 @@ export const saveItem = createServerFn({ method: "POST" })
       video_url: data.video_url || null,
       item_date: data.item_date || null,
       link: data.link || null,
+      coverage: data.coverage || null,
+      event_type: data.event_type || null,
     };
     if (data.id) {
       const { error } = await context.supabase.from("content_items").update(payload).eq("id", data.id);
@@ -220,6 +229,7 @@ const highlightSchema = z.object({
   title: z.string().min(1),
   image_url: z.string().nullable().optional(),
   link: z.string(),
+  featured: z.boolean().optional(),
   sort_order: z.number().optional(),
 });
 
@@ -228,7 +238,12 @@ export const saveHighlight = createServerFn({ method: "POST" })
   .inputValidator((d) => highlightSchema.parse(d))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const payload = { title: data.title, image_url: data.image_url || null, link: data.link };
+    const payload = {
+      title: data.title,
+      image_url: data.image_url || null,
+      link: data.link,
+      featured: !!data.featured,
+    };
     if (data.id) {
       const { error } = await context.supabase.from("highlights").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
