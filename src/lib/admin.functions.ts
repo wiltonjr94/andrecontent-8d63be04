@@ -47,7 +47,7 @@ export const getAdminData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const [site, theme, pages, items, highlights, brands, media] = await Promise.all([
+    const [site, theme, pages, items, highlights, brands, media, filters] = await Promise.all([
       context.supabase.from("site_settings").select("*").limit(1).maybeSingle(),
       context.supabase.from("theme_settings").select("*").limit(1).maybeSingle(),
       context.supabase.from("pages").select("*").order("sort_order"),
@@ -65,7 +65,7 @@ export const getAdminData = createServerFn({ method: "GET" })
       highlights: highlights.data ?? [],
       brands: brands.data ?? [],
       media: media.data ?? [],
-      filters: [] as any[],
+      filters: filters.data ?? [],
     };
   });
 
