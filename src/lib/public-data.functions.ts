@@ -164,6 +164,8 @@ export interface PageData {
     video_url: string | null;
     item_date: string | null;
     link: string | null;
+    coverage: string | null;
+    event_type: string | null;
   }[];
 }
 
@@ -179,7 +181,7 @@ export const getPageBySlug = createServerFn({ method: "GET" })
     if (!page) return { page: null, items: [] };
     const { data: items } = await supabase
       .from("content_items")
-      .select("id, title, description, image_url, video_url, item_date, link")
+      .select("id, title, description, image_url, video_url, item_date, link, coverage, event_type")
       .eq("page_id", page.id)
       .order("sort_order");
     return {
@@ -187,6 +189,60 @@ export const getPageBySlug = createServerFn({ method: "GET" })
       items: items ?? [],
     };
   });
+
+export interface FilterOption {
+  id: string;
+  kind: "coverage" | "event";
+  label: string;
+}
+
+export interface WorksData {
+  items: {
+    id: string;
+    title: string;
+    description: string;
+    image_url: string | null;
+    video_url: string | null;
+    item_date: string | null;
+    coverage: string | null;
+    event_type: string | null;
+    page_slug: string | null;
+  }[];
+  filters: FilterOption[];
+}
+
+export const getAllWorks = createServerFn({ method: "GET" }).handler(
+  async (): Promise<WorksData> => {
+    try {
+      const supabase = publicClient();
+      const [itemsRes, pagesRes, filtersRes] = await Promise.all([
+        supabase
+          .from("content_items")
+          .select(
+            "id, title, description, image_url, video_url, item_date, coverage, event_type, page_id",
+          )
+          .order("sort_order"),
+        supabase.from("pages").select("id, slug"),
+        supabase.from("filter_options").select("id, kind, label").order("sort_order"),
+      ]);
+      const pageMap = new Map((pagesRes.data ?? []).map((p) => [p.id, p.slug]));
+      const items = (itemsRes.data ?? []).map((i) => ({
+        id: i.id,
+        title: i.title,
+        description: i.description,
+        image_url: i.image_url,
+        video_url: i.video_url,
+        item_date: i.item_date,
+        coverage: i.coverage,
+        event_type: i.event_type,
+        page_slug: pageMap.get(i.page_id) ?? null,
+      }));
+      return { items, filters: (filtersRes.data ?? []) as FilterOption[] };
+    } catch {
+      return { items: [], filters: [] };
+    }
+  },
+);
 
 export interface ItemMedia {
   id: string;
