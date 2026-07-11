@@ -96,6 +96,7 @@ function AdminPage() {
               ["pages", "Páginas & Itens"],
               ["highlights", "Destaques"],
               ["brands", "Marcas"],
+            ["filters", "Filtros"],
             ] as [Tab, string][]
           ).map(([id, label]) => (
             <button
@@ -117,6 +118,7 @@ function AdminPage() {
         {tab === "pages" && <PagesSection data={data} onSaved={refresh} />}
         {tab === "highlights" && <HighlightsSection data={data} onSaved={refresh} />}
         {tab === "brands" && <BrandsSection data={data} onSaved={refresh} />}
+        {tab === "filters" && <FiltersSection data={data} onSaved={refresh} />}
       </main>
     </div>
   );
