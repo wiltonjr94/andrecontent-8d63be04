@@ -453,6 +453,7 @@ function PagesSection({ data, onSaved }: { data: AdminData; onSaved: () => void 
           page={page}
           items={data.items.filter((i) => i.page_id === page.id)}
           allMedia={data.media}
+          filters={data.filters}
           canUp={idx > 0}
           canDown={idx < data.pages.length - 1}
           onMove={(dir) => move(idx, dir)}
@@ -475,6 +476,7 @@ function PageBlock({
   page,
   items,
   allMedia,
+  filters,
   canUp,
   canDown,
   onMove,
@@ -485,6 +487,7 @@ function PageBlock({
   page: AdminData["pages"][number];
   items: AdminData["items"];
   allMedia: AdminData["media"];
+  filters: AdminData["filters"];
   canUp: boolean;
   canDown: boolean;
   onMove: (dir: number) => void;
