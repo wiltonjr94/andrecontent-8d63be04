@@ -546,7 +546,7 @@ function PageBlock({
         </div>
         {adding ? (
           <ItemRow
-            item={{ id: "", page_id: page.id, title: "", description: "", image_url: null, video_url: null, item_date: null, link: null, sort_order: items.length, created_at: "", updated_at: "" }}
+            item={{ id: "", page_id: page.id, title: "", description: "", image_url: null, video_url: null, item_date: null, link: null, coverage: null, event_type: null, sort_order: items.length, created_at: "", updated_at: "" }}
             isNew
             onSave={async (payload) => {
               await saveItemFn({ data: { ...payload, sort_order: items.length } });
@@ -915,7 +915,7 @@ function HighlightsSection({ data, onSaved }: { data: AdminData; onSaved: () => 
       ))}
       {adding ? (
         <HighlightRow
-          h={{ id: "", title: "", image_url: null, link: "/", sort_order: data.highlights.length, created_at: "", updated_at: "" }}
+          h={{ id: "", title: "", image_url: null, link: "/", featured: false, sort_order: data.highlights.length, created_at: "", updated_at: "" }}
           pages={data.pages}
           isNew
           onSave={async (payload) => {
