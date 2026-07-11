@@ -357,15 +357,6 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
           <RangeField label="Largura da foto 'Quem sou eu'" value={layout.about_max_width} min={200} max={800} step={10} onChange={(v) => setL("about_max_width", v)} />
           <RangeField label="Largura da imagem de serviços" value={layout.services_max_width} min={400} max={1400} step={10} onChange={(v) => setL("services_max_width", v)} />
         </div>
-        <div>
-          <label className={labelCls}>Imagem de fundo (opcional — substitui o azul padrão)</label>
-          <ImageField value={layout.background_url} onChange={(url) => setL("background_url", url)} />
-          {layout.background_url && (
-            <button type="button" className={`${btnGhost} mt-2 text-tomato`} onClick={() => setL("background_url", null)}>
-              Remover fundo personalizado
-            </button>
-          )}
-        </div>
       </div>
 
       <button
