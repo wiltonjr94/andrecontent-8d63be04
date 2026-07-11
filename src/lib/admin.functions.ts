@@ -398,3 +398,41 @@ export const deleteMedia = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ----- Filter options (coverage / event) -----
+const filterSchema = z.object({
+  id: z.string().optional(),
+  kind: z.enum(["coverage", "event"]),
+  label: z.string().min(1),
+  sort_order: z.number().optional(),
+});
+
+export const saveFilter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => filterSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    if (data.id) {
+      const { error } = await context.supabase
+        .from("filter_options")
+        .update({ kind: data.kind, label: data.label })
+        .eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase
+        .from("filter_options")
+        .insert({ kind: data.kind, label: data.label, sort_order: data.sort_order ?? 0 });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteFilter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("filter_options").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
