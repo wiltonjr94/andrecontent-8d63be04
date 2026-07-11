@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
+import type { TextStyle } from "./text-style";
 
 function publicClient() {
   return createClient<Database>(
@@ -25,7 +26,7 @@ export interface SiteBundle {
     layout: HomeLayout;
     services_title: string;
     services_subtitle: string;
-    text_styles: Record<string, unknown>;
+    text_styles: Record<string, TextStyle>;
   };
   theme: {
     color_denim: string;
@@ -138,7 +139,8 @@ export const getSiteBundle = createServerFn({ method: "GET" }).handler(
           ? {
               ...siteRes.data,
               layout: mergeLayout((siteRes.data as any).layout),
-              text_styles: ((siteRes.data as any).text_styles as Record<string, unknown>) ?? {},
+              text_styles:
+                ((siteRes.data as any).text_styles as Record<string, TextStyle>) ?? {},
             }
           : DEFAULT_BUNDLE.site,
         theme: themeRes.data ?? DEFAULT_BUNDLE.theme,
