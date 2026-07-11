@@ -986,7 +986,7 @@ function HighlightRow({
   onDelete?: () => void;
   onCancel?: () => void;
 }) {
-  const [f, setF] = useState({ id: h.id || undefined, title: h.title, image_url: h.image_url, link: h.link });
+  const [f, setF] = useState({ id: h.id || undefined, title: h.title, image_url: h.image_url, link: h.link, featured: !!h.featured });
   const set = (k: string, v: string | null) => setF({ ...f, [k]: v });
   return (
     <div className={cardCls}>
