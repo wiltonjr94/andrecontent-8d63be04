@@ -23,6 +23,9 @@ export interface SiteBundle {
     linkedin: string;
     email: string;
     layout: HomeLayout;
+    services_title: string;
+    services_subtitle: string;
+    text_styles: Record<string, unknown>;
   };
   theme: {
     color_denim: string;
@@ -53,6 +56,10 @@ export interface HomeLayout {
   services_max_width: number;
   /** Optional background image override url. */
   background_url: string | null;
+  /** How to render the page background. */
+  background_mode: "image" | "color";
+  /** Solid background color used when background_mode is "color". */
+  background_color: string;
 }
 
 export const DEFAULT_LAYOUT: HomeLayout = {
@@ -62,6 +69,8 @@ export const DEFAULT_LAYOUT: HomeLayout = {
   about_max_width: 384,
   services_max_width: 1152,
   background_url: null,
+  background_mode: "image",
+  background_color: "#1E2540",
 };
 
 export function mergeLayout(raw: unknown): HomeLayout {
@@ -73,6 +82,8 @@ export function mergeLayout(raw: unknown): HomeLayout {
     about_max_width: Number(obj.about_max_width) || DEFAULT_LAYOUT.about_max_width,
     services_max_width: Number(obj.services_max_width) || DEFAULT_LAYOUT.services_max_width,
     background_url: (obj.background_url as string) || null,
+    background_mode: obj.background_mode === "color" ? "color" : "image",
+    background_color: (obj.background_color as string) || DEFAULT_LAYOUT.background_color,
   };
 }
 
@@ -88,6 +99,10 @@ const DEFAULT_BUNDLE: SiteBundle = {
     linkedin: "",
     email: "",
     layout: DEFAULT_LAYOUT,
+    services_title: "SERVIÇOS DISPONIBILIZADOS",
+    services_subtitle:
+      "Impulsione a sua empresa com vídeos incríveis e conquiste os melhores resultados.",
+    text_styles: {},
   },
   theme: {
     color_denim: "#1E2540",
@@ -120,7 +135,11 @@ export const getSiteBundle = createServerFn({ method: "GET" }).handler(
       ]);
       return {
         site: siteRes.data
-          ? { ...siteRes.data, layout: mergeLayout((siteRes.data as any).layout) }
+          ? {
+              ...siteRes.data,
+              layout: mergeLayout((siteRes.data as any).layout),
+              text_styles: ((siteRes.data as any).text_styles as Record<string, unknown>) ?? {},
+            }
           : DEFAULT_BUNDLE.site,
         theme: themeRes.data ?? DEFAULT_BUNDLE.theme,
         pages: pagesRes.data ?? [],
