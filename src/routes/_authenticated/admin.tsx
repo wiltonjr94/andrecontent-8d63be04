@@ -257,6 +257,16 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
   const [layout, setLayout] = useState<HomeLayout>(mergeLayout((data.site as any)?.layout));
   const setL = (k: keyof HomeLayout, v: number | string | null) =>
     setLayout({ ...layout, [k]: v } as HomeLayout);
+  const [styles, setStyles] = useState<Record<string, TextStyle>>(
+    () => {
+      const src = ((data.site as any)?.text_styles ?? {}) as Record<string, unknown>;
+      const out: Record<string, TextStyle> = {};
+      for (const slot of TEXT_SLOTS) out[slot.key] = mergeTextStyle(src[slot.key], slot.defaultFont);
+      return out;
+    },
+  );
+  const setStyle = (key: string, patch: Partial<TextStyle>) =>
+    setStyles((s) => ({ ...s, [key]: { ...s[key], ...patch } }));
 
   return (
     <div className={`${cardCls} space-y-4`}>
@@ -285,6 +295,48 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         <Field label="E-mail" value={form.email} onChange={(v) => set("email", v)} />
         <Field label="Instagram" value={form.instagram} onChange={(v) => set("instagram", v)} />
         <Field label="LinkedIn" value={form.linkedin} onChange={(v) => set("linkedin", v)} />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Título dos serviços" value={(form as any).services_title || ""} onChange={(v) => set("services_title", v)} />
+        <Field label="Subtítulo dos serviços" value={(form as any).services_subtitle || ""} onChange={(v) => set("services_subtitle", v)} />
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <h3 className="text-sm font-semibold">Fundo da página inicial</h3>
+        <div className="flex gap-4 text-sm">
+          <label className="flex items-center gap-2">
+            <input type="radio" checked={layout.background_mode === "image"} onChange={() => setL("background_mode", "image")} />
+            Imagem
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" checked={layout.background_mode === "color"} onChange={() => setL("background_mode", "color")} />
+            Cor sólida
+          </label>
+        </div>
+        {layout.background_mode === "color" ? (
+          <div>
+            <label className={labelCls}>Cor de fundo</label>
+            <input type="color" className="h-10 w-20 rounded border border-input bg-card" value={layout.background_color} onChange={(e) => setL("background_color", e.target.value)} />
+          </div>
+        ) : (
+          <div>
+            <label className={labelCls}>Imagem de fundo (opcional — substitui o azul padrão)</label>
+            <ImageField value={layout.background_url} onChange={(url) => setL("background_url", url)} />
+            {layout.background_url && (
+              <button type="button" className={`${btnGhost} mt-2 text-tomato`} onClick={() => setL("background_url", null)}>
+                Remover fundo personalizado
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
+        <h3 className="text-sm font-semibold">Estilo dos textos</h3>
+        {TEXT_SLOTS.map((slot) => (
+          <TextStyleEditor key={slot.key} label={slot.label} value={styles[slot.key]} onChange={(p) => setStyle(slot.key, p)} />
+        ))}
       </div>
 
       <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
@@ -322,7 +374,7 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         onClick={async () => {
           setBusy(true);
           try {
-            await save({ data: { ...form, layout } as any });
+            await save({ data: { ...form, layout, text_styles: styles } as any });
             onSaved();
           } finally {
             setBusy(false);
