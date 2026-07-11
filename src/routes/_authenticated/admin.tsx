@@ -532,6 +532,7 @@ function PageBlock({
               key={item.id}
               item={item}
               media={allMedia.filter((m) => m.item_id === item.id)}
+              filters={filters}
               canUp={idx > 0}
               canDown={idx < items.length - 1}
               onMove={(dir) => moveItem(idx, dir)}
@@ -550,6 +551,7 @@ function PageBlock({
         {adding ? (
           <ItemRow
             item={{ id: "", page_id: page.id, title: "", description: "", image_url: null, video_url: null, item_date: null, link: null, coverage: null, event_type: null, sort_order: items.length, created_at: "", updated_at: "" }}
+            filters={filters}
             isNew
             onSave={async (payload) => {
               await saveItemFn({ data: { ...payload, sort_order: items.length } });
@@ -571,6 +573,7 @@ function PageBlock({
 function ItemRow({
   item,
   media,
+  filters,
   isNew,
   canUp,
   canDown,
@@ -582,6 +585,7 @@ function ItemRow({
 }: {
   item: AdminData["items"][number];
   media?: AdminData["media"];
+  filters?: AdminData["filters"];
   isNew?: boolean;
   canUp?: boolean;
   canDown?: boolean;
@@ -599,14 +603,38 @@ function ItemRow({
     image_url: item.image_url,
     link: item.link ?? "",
     item_date: item.item_date ?? "",
+    coverage: item.coverage ?? "",
+    event_type: item.event_type ?? "",
   });
   const set = (k: string, v: string | null) => setF({ ...f, [k]: v });
+  const coverageOpts = (filters ?? []).filter((x) => x.kind === "coverage");
+  const eventOpts = (filters ?? []).filter((x) => x.kind === "event");
 
   return (
     <div className="rounded-xl border border-border/70 bg-background/40 p-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Título" value={f.title} onChange={(v) => set("title", v)} />
         <Field label="Data" value={f.item_date} onChange={(v) => set("item_date", v)} type="date" />
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelCls}>Tipo de cobertura</label>
+          <select className={inputCls} value={f.coverage} onChange={(e) => set("coverage", e.target.value)}>
+            <option value="">—</option>
+            {coverageOpts.map((o) => (
+              <option key={o.id} value={o.label}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Tipo de evento</label>
+          <select className={inputCls} value={f.event_type} onChange={(e) => set("event_type", e.target.value)}>
+            <option value="">—</option>
+            {eventOpts.map((o) => (
+              <option key={o.id} value={o.label}>{o.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className="mt-3">
         <label className={labelCls}>Descrição</label>
