@@ -4,7 +4,6 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProjectsGrid } from "@/components/ProjectsGrid";
 import { BrandsMarquee } from "@/components/BrandsMarquee";
-import { HorizontalScroller } from "@/components/HorizontalScroller";
 import { useSite } from "@/lib/site-context";
 import { mergeTextStyle, textStyleToCss } from "@/lib/text-style";
 import bgAzul from "@/assets/bg-azul.png.asset.json";
@@ -26,7 +25,7 @@ function Index() {
     textStyleToCss(mergeTextStyle((site.text_styles || {})[slot], defaultFont));
 
   const featured = highlights.filter((h) => (h as any).featured);
-  const projects = featured.length > 0 ? featured : highlights;
+  const projects = (featured.length > 0 ? featured : highlights).slice(0, 6);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -49,7 +48,7 @@ function Index() {
 
       <main>
         {/* Hero */}
-        <section className="relative mx-auto flex max-w-6xl flex-col items-center px-5 pt-28 sm:px-8 sm:pt-32">
+        <section className="relative mx-auto flex max-w-6xl flex-col items-center px-5 pt-24 sm:px-8 sm:pt-32">
           <h1 className="sr-only">{site.hero_title}</h1>
           <img
             src={heroImg.url}
@@ -62,25 +61,16 @@ function Index() {
           />
         </section>
 
-        {/* Quem sou eu */}
+        {/* Quem sou eu — texto à esquerda, imagem à direita */}
         <section
           id="quem-sou-eu"
           className="mx-auto mt-16 grid max-w-6xl items-center gap-10 px-5 sm:mt-24 sm:px-8 md:grid-cols-2"
         >
-          <div className="flex justify-center">
-            <img
-              src={quemSouEu.url}
-              alt="André"
-              loading="lazy"
-              style={{ maxWidth: `${layout.about_max_width}px` }}
-              className="w-full object-contain"
-            />
-          </div>
-          <div>
-            <h2 className="text-4xl font-bold leading-tight text-butter sm:text-5xl" style={styleFor("about_heading")}>
+          <div className="order-2 md:order-1">
+            <h2 className="text-3xl font-bold leading-tight text-butter sm:text-4xl lg:text-5xl" style={styleFor("about_heading")}>
               Mas afinal,<br />quem é o André?
             </h2>
-            <p className="mt-6 max-w-lg text-lg text-foreground/85 whitespace-pre-line" style={styleFor("about_text", "body")}>
+            <p className="mt-6 max-w-lg text-base text-foreground/85 whitespace-pre-line sm:text-lg" style={styleFor("about_text", "body")}>
               {site.hero_subtitle ||
                 "Publicitário e profissional do audiovisual apaixonado por contar histórias através da imagem. Atuo entre direção criativa, fotografia, vídeo e edição, transformando ideias em narrativas visuais com olhar estratégico e sensibilidade estética."}
             </p>
@@ -93,54 +83,64 @@ function Index() {
               <MessageCircle className="h-5 w-5" /> Fala comigo!
             </a>
           </div>
+          <div className="order-1 flex justify-center md:order-2">
+            <img
+              src={quemSouEu.url}
+              alt="André"
+              loading="lazy"
+              style={{ maxWidth: `${layout.about_max_width}px` }}
+              className="w-full object-contain"
+            />
+          </div>
         </section>
 
         {/* Marcas que confiam */}
-        <section className="mt-20 sm:mt-28">
-          <BrandsMarquee brands={brands} />
-        </section>
+        <BrandsMarquee
+          brands={brands}
+          title={site.brands_title}
+          titleStyle={styleFor("brands_title")}
+        />
 
-        {/* Serviços disponibilizados */}
-        <section className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
-          <div className="flex justify-center">
+        {/* Serviços disponibilizados — imagem de ponta a ponta com título sobreposto */}
+        <section className="relative left-1/2 mt-16 w-screen -translate-x-1/2 sm:mt-24">
+          <div className="relative">
             <img
               src={servicos.url}
               alt="Serviços disponibilizados"
               loading="lazy"
-              style={{ maxWidth: `${layout.services_max_width}px` }}
-              className="w-full rounded-3xl object-cover"
+              className="h-auto w-full object-cover"
             />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-denim/40 px-5 text-center">
+              <h2
+                className="text-2xl font-bold uppercase text-butter drop-shadow-lg sm:text-4xl lg:text-5xl"
+                style={styleFor("services_title")}
+              >
+                {site.services_title || "SERVIÇOS DISPONIBILIZADOS"}
+              </h2>
+              <p
+                className="max-w-2xl text-sm text-foreground drop-shadow-md sm:text-lg"
+                style={styleFor("services_subtitle", "body")}
+              >
+                {site.services_subtitle ||
+                  "Impulsione a sua empresa com vídeos incríveis e conquiste os melhores resultados."}
+              </p>
+            </div>
           </div>
-          <h2
-            className="mt-10 text-center text-3xl font-bold uppercase text-butter sm:text-4xl"
-            style={styleFor("services_title")}
-          >
-            {site.services_title || "SERVIÇOS DISPONIBILIZADOS"}
-          </h2>
-          <p
-            className="mx-auto mt-3 max-w-2xl text-center text-lg text-foreground/85"
-            style={styleFor("services_subtitle", "body")}
-          >
-            {site.services_subtitle ||
-              "Impulsione a sua empresa com vídeos incríveis e conquiste os melhores resultados."}
-          </p>
         </section>
 
-        {/* Projetos recentes */}
+        {/* Projetos recentes — painel estático com até 6 projetos */}
         <section id="projetos" className="mx-auto mt-20 max-w-6xl px-5 sm:mt-28 sm:px-8">
           <h2
-            className="mb-8 text-center text-3xl font-bold text-butter sm:text-4xl"
+            className="mb-8 text-center text-2xl font-bold text-butter sm:text-4xl"
             style={styleFor("projects_title")}
           >
             Meus últimos projetos
           </h2>
-          <HorizontalScroller>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((h) => (
-              <div key={h.id} className="w-[85%] shrink-0 snap-start sm:w-[48%]">
-                <ProjectsGrid highlights={[h]} />
-              </div>
+              <ProjectsGrid key={h.id} highlights={[h]} />
             ))}
-          </HorizontalScroller>
+          </div>
         </section>
       </main>
 

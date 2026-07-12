@@ -25,6 +25,7 @@ export const TEXT_SLOTS: { key: string; label: string; defaultFont: "display" | 
   { key: "about_text", label: "Texto de apresentação", defaultFont: "body" },
   { key: "services_title", label: "Título dos serviços", defaultFont: "display" },
   { key: "services_subtitle", label: "Subtítulo dos serviços", defaultFont: "body" },
+  { key: "brands_title", label: "Título 'Marcas que confiam...'", defaultFont: "display" },
   { key: "projects_title", label: "Título 'Meus últimos projetos'", defaultFont: "display" },
 ];
 
