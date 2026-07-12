@@ -302,6 +302,10 @@ function SiteSection({ data, onSaved }: { data: AdminData; onSaved: () => void }
         <Field label="Subtítulo dos serviços" value={(form as any).services_subtitle || ""} onChange={(v) => set("services_subtitle", v)} />
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Título das marcas" value={(form as any).brands_title || ""} onChange={(v) => set("brands_title", v)} />
+      </div>
+
       <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
         <h3 className="text-sm font-semibold">Fundo da página inicial</h3>
         <div className="flex gap-4 text-sm">
