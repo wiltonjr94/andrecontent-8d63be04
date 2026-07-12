@@ -26,6 +26,7 @@ export interface SiteBundle {
     layout: HomeLayout;
     services_title: string;
     services_subtitle: string;
+    brands_title: string;
     text_styles: Record<string, TextStyle>;
   };
   theme: {
@@ -103,6 +104,7 @@ const DEFAULT_BUNDLE: SiteBundle = {
     services_title: "SERVIÇOS DISPONIBILIZADOS",
     services_subtitle:
       "Impulsione a sua empresa com vídeos incríveis e conquiste os melhores resultados.",
+    brands_title: "Marcas que confiam no meu trabalho",
     text_styles: {},
   },
   theme: {
