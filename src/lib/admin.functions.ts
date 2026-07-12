@@ -82,6 +82,7 @@ const siteSchema = z.object({
   email: z.string(),
   services_title: z.string().optional(),
   services_subtitle: z.string().optional(),
+  brands_title: z.string().optional(),
   text_styles: z.record(z.string(), z.any()).optional(),
   layout: z
     .object({
