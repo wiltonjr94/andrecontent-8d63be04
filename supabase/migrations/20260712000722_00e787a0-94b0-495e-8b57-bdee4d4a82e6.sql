@@ -1,0 +1,1 @@
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS brands_title TEXT NOT NULL DEFAULT 'Marcas que confiam no meu trabalho';

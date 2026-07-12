@@ -231,6 +231,7 @@ export type Database = {
       site_settings: {
         Row: {
           avatar_url: string | null
+          brands_title: string
           email: string
           hero_subtitle: string
           hero_title: string
@@ -248,6 +249,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          brands_title?: string
           email?: string
           hero_subtitle?: string
           hero_title?: string
@@ -265,6 +267,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          brands_title?: string
           email?: string
           hero_subtitle?: string
           hero_title?: string
