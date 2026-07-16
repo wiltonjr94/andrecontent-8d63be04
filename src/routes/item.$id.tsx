@@ -46,9 +46,16 @@ export const Route = createFileRoute("/item/$id")({
 
 function MediaBlock({ m }: { m: ItemMedia }) {
   const embed = m.media_type === "video" ? toEmbed(m.url) : null;
+
+  const isDirectVideo =
+    m.media_type === "video" &&
+    !embed &&
+    /\.(mp4|webm|mov|ogg)$/i.test(m.url);
+
   return (
     <figure className="group overflow-hidden rounded-3xl border border-border bg-card">
       <div className="aspect-[16/10] overflow-hidden bg-muted">
+
         {embed ? (
           <iframe
             src={embed}
@@ -58,6 +65,15 @@ function MediaBlock({ m }: { m: ItemMedia }) {
             allowFullScreen
             className="h-full w-full"
           />
+        ) : isDirectVideo ? (
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover"
+          >
+            <source src={m.url} />
+          </video>
         ) : (
           m.url && (
             <img
@@ -68,6 +84,27 @@ function MediaBlock({ m }: { m: ItemMedia }) {
             />
           )
         )}
+
+      </div>
+
+      {(m.title || m.description) && (
+        <figcaption className="p-5">
+          {m.title && (
+            <h3 className="text-lg font-semibold">
+              {m.title}
+            </h3>
+          )}
+
+          {m.description && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {m.description}
+            </p>
+          )}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
       </div>
       {(m.title || m.description) && (
         <figcaption className="p-5">
