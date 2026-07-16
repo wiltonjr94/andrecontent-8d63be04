@@ -2,14 +2,30 @@
 export function toEmbed(url?: string | null): string | null {
   if (!url) return null;
 
-  // YouTube (watch, embed, shorts, youtu.be)
-  const yt = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/,
-  );
+  // YouTube
+  try {
+    const parsed = new URL(url);
 
-  if (yt) {
-    return `https://www.youtube.com/embed/${yt[1]}`;
-  }
+    if (
+      parsed.hostname.includes("youtube.com") ||
+      parsed.hostname.includes("youtu.be")
+    ) {
+      let id = "";
+
+      if (parsed.hostname.includes("youtu.be")) {
+        id = parsed.pathname.replace("/", "");
+      } else if (parsed.searchParams.get("v")) {
+        id = parsed.searchParams.get("v")!;
+      } else {
+        const parts = parsed.pathname.split("/");
+        id = parts[parts.length - 1];
+      }
+
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+    }
+  } catch {}
 
   // Vimeo
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
@@ -25,13 +41,16 @@ export function toEmbed(url?: string | null): string | null {
     return `https://www.instagram.com/p/${ig[1]}/embed`;
   }
 
-  // Google Drive
-  const drive = url.match(
-    /drive\.google\.com\/file\/d\/([^/]+)/
-  );
+  // Google Drive (todos os formatos)
 
-  if (drive) {
-    return `https://drive.google.com/file/d/${drive[1]}/preview`;
+  let match = url.match(/drive\.google\.com\/file\/d\/([^/?]+)/);
+
+  if (!match) {
+    match = url.match(/[?&]id=([^&]+)/);
+  }
+
+  if (match) {
+    return `https://drive.google.com/file/d/${match[1]}/preview`;
   }
 
   return null;
