@@ -50,7 +50,7 @@ function MediaBlock({ m }: { m: ItemMedia }) {
   const isDirectVideo =
     m.media_type === "video" &&
     !embed &&
-    /\.(mp4|webm|mov|ogg)$/i.test(m.url);
+    /\.(mp4|mov|webm|ogg)$/i.test(m.url);
 
   return (
     <figure className="group overflow-hidden rounded-3xl border border-border bg-card">
@@ -85,6 +85,26 @@ function MediaBlock({ m }: { m: ItemMedia }) {
           )
         )}
 
+      </div>
+
+      {(m.title || m.description) && (
+        <figcaption className="p-5">
+          {m.title && (
+            <h3 className="text-lg font-semibold">
+              {m.title}
+            </h3>
+          )}
+
+          {m.description && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {m.description}
+            </p>
+          )}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
       </div>
 
       {(m.title || m.description) && (
